@@ -15,13 +15,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.persistence.NonUniqueResultException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /** Service to trigger deletion of inactive sessions and asker accounts. */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DeleteInactiveSessionsAndUserService {
 
   private final @NonNull UserRepository userRepository;
@@ -78,14 +81,20 @@ public class DeleteInactiveSessionsAndUserService {
 
     List<DeletionWorkflowError> workflowErrors = new ArrayList<>();
 
-    Optional<User> user =
-        userRepository.findByRcUserIdAndDeleteDateIsNull(userInactiveGroupEntry.getKey());
-    user.ifPresentOrElse(
-        u -> workflowErrors.addAll(deleteInactiveGroupsOrUser(userInactiveGroupEntry, u)),
-        () ->
-            workflowErrors.addAll(
-                performUserSessionDeletionForNonExistingUser(userInactiveGroupEntry.getValue())));
-
+    try {
+      Optional<User> user =
+          userRepository.findByRcUserIdAndDeleteDateIsNull(userInactiveGroupEntry.getKey());
+      user.ifPresentOrElse(
+          u -> workflowErrors.addAll(deleteInactiveGroupsOrUser(userInactiveGroupEntry, u)),
+          () ->
+              workflowErrors.addAll(
+                  performUserSessionDeletionForNonExistingUser(userInactiveGroupEntry.getValue())));
+    } catch (NonUniqueResultException ex) {
+      log.error(
+          "Non unique result for findByRcUserIdAndDeleteDateIsNull found. RcUserId:",
+          userInactiveGroupEntry.getKey());
+      return workflowErrors;
+    }
     return workflowErrors;
   }
 
@@ -138,7 +147,11 @@ public class DeleteInactiveSessionsAndUserService {
       String rcGroupId) {
     List<DeletionWorkflowError> workflowErrors = new ArrayList<>();
     Optional<Session> session = sessionRepository.findByGroupId(rcGroupId);
-    session.ifPresent(s -> workflowErrors.addAll(deleteSessionService.performSessionDeletion(s)));
+    if (session.isPresent()) {
+      workflowErrors.addAll(deleteSessionService.performSessionDeletion(session.get()));
+    } else {
+      workflowErrors.addAll(deleteSessionService.performRocketchatSessionDeletion(rcGroupId));
+    }
     return workflowErrors;
   }
 
