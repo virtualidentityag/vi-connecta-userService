@@ -60,7 +60,7 @@ public class RocketChatAsyncHelper {
           .onSessions(relevantSessions)
           .withConsultant(consultant)
           .addToGroupsOrRollbackOnFailure();
-      updateConsultantStatus(consultant, agency);
+      updateConsultantAgencyStatus(consultant, agency);
     } catch (Exception e) {
       consultant.setStatus(ConsultantStatus.ERROR);
       consultantRepository.save(consultant);
@@ -70,19 +70,12 @@ public class RocketChatAsyncHelper {
     TenantContext.clear();
   }
 
-  private void updateConsultantStatus(Consultant consultant, AgencyDTO agencyDTO) {
+  private void updateConsultantAgencyStatus(Consultant consultant, AgencyDTO agencyDTO) {
     ConsultantAgency consultantAgency =
         consultantAgencyRepository.findByConsultantIdAndAgencyIdAndStatusAndDeleteDateIsNull(
             consultant.getId(), agencyDTO.getId(), ConsultantAgencyStatus.IN_PROGRESS);
 
     consultantAgency.setStatus(ConsultantAgencyStatus.CREATED);
-    List<ConsultantAgency> consultantAgencies =
-        consultantAgencyRepository.findByConsultantIdAndStatusAndDeleteDateIsNull(
-            consultant.getId(), ConsultantAgencyStatus.IN_PROGRESS);
-    if (consultantAgencies.size() == 0) {
-      consultant.setStatus(ConsultantStatus.CREATED);
-      consultantRepository.save(consultant);
-    }
   }
 
   private void sendErrorEmail(Consultant consultant, Exception exception) {

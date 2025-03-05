@@ -21,6 +21,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.Sort.FieldEnum;
 import de.caritas.cob.userservice.api.admin.service.agency.ConsultantAgencyAdminService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminFilterService;
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantAdminService;
+import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyCreationInput;
 import de.caritas.cob.userservice.api.admin.service.consultant.create.agencyrelation.ConsultantAgencyRelationCreatorService;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
@@ -28,6 +29,7 @@ import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -49,7 +51,7 @@ class ConsultantAdminFacadeTest {
 
   @Mock private ConsultantAgencyAdminService consultantAgencyAdminService;
 
-  @Mock private ConsultantAgencyRelationCreatorService relationCreatorService;
+  @Mock private ConsultantAgencyRelationCreatorService consultantAgencyRelationCreatorService;
 
   @Mock private AuthenticatedUser authenticatedUser;
 
@@ -99,7 +101,7 @@ class ConsultantAdminFacadeTest {
   void createNewConsultantAgency_Should_useConsultantAgencyAdminServiceCorrectly() {
     this.consultantAdminFacade.createNewConsultantAgency(null, null);
 
-    verify(this.relationCreatorService).createNewConsultantAgency(null, null);
+    verify(this.consultantAgencyRelationCreatorService).createNewConsultantAgency(null, null);
   }
 
   @Test
@@ -264,6 +266,23 @@ class ConsultantAdminFacadeTest {
 
     // then
     Mockito.verifyNoInteractions(agencyService);
+  }
+
+  @Test
+  void completeConsultantAgencyAssigment_Should_UpdateConsultantStatusAfterCompletingAssignment() {
+    String consultantId = "test-consultant-id";
+    List<CreateConsultantAgencyDTO> agencies = new ArrayList<>();
+    CreateConsultantAgencyDTO agency1 = new CreateConsultantAgencyDTO();
+    agencies.add(agency1);
+    CreateConsultantAgencyDTO agency2 = new CreateConsultantAgencyDTO();
+    agencies.add(agency2);
+
+    consultantAdminFacade.completeConsultantAgencyAssigment(consultantId, agencies);
+
+    verify(consultantAgencyRelationCreatorService, times(2))
+        .completeConsultantAgencyAssigment(
+            Mockito.any(ConsultantAgencyCreationInput.class), Mockito.any(Consumer.class));
+    verify(consultantAgencyRelationCreatorService, times(1)).updateConsultantStatus(consultantId);
   }
 
   private AgencyDTO createAgencyWithTenant(Long tenantId) {

@@ -12,6 +12,7 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.ConsultantAgency;
 import de.caritas.cob.userservice.api.model.ConsultantAgencyStatus;
 import de.caritas.cob.userservice.api.model.ConsultantStatus;
+import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
@@ -20,6 +21,7 @@ import de.caritas.cob.userservice.api.service.LogService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.tenant.TenantContext;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -38,6 +40,8 @@ public class ConsultantAgencyRelationCreatorService {
   private final @NonNull IdentityClient identityClient;
   private final @NonNull ConsultingTypeManager consultingTypeManager;
   private final @NonNull RocketChatAsyncHelper rocketChatAsyncHelper;
+
+  private final @NonNull ConsultantAgencyRepository consultantAgencyRepository;
 
   /**
    * Creates a new {@link ConsultantAgency} based on the {@link ImportRecord} and agency ids.
@@ -103,6 +107,21 @@ public class ConsultantAgencyRelationCreatorService {
 
     if (isTeamAgencyButNotTeamConsultant(agency, consultant)) {
       consultant.setTeamConsultant(true);
+      consultantRepository.save(consultant);
+    }
+  }
+
+  public void updateConsultantStatus(String consultantId) {
+    var consultant = retrieveConsultant(consultantId);
+    updateConsultantStatus(consultant);
+  }
+
+  private void updateConsultantStatus(Consultant consultant) {
+    List<ConsultantAgency> consultantAgencies =
+        consultantAgencyRepository.findByConsultantIdAndStatusAndDeleteDateIsNull(
+            consultant.getId(), ConsultantAgencyStatus.IN_PROGRESS);
+    if (consultantAgencies.size() == 0) {
+      consultant.setStatus(ConsultantStatus.CREATED);
       consultantRepository.save(consultant);
     }
   }

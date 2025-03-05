@@ -252,6 +252,8 @@ public class ConsultantAdminFacade {
             this.consultantAgencyRelationCreatorService.completeConsultantAgencyAssigment(
                 new CreateConsultantAgencyDTOInputAdapter(consultantId, agency),
                 LogService::logInfo));
+
+    consultantAgencyRelationCreatorService.updateConsultantStatus(consultantId);
   }
 
   /**
