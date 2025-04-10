@@ -1,6 +1,7 @@
 package de.caritas.cob.userservice.api.config;
 
 import de.caritas.cob.userservice.api.admin.service.consultant.ConsultantReindexer;
+import io.sentry.Sentry;
 import io.sentry.SentryOptions;
 import java.time.Clock;
 import javax.annotation.PostConstruct;
@@ -16,6 +17,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -67,9 +69,10 @@ public class AppConfig implements ApplicationContextAware {
     return Clock.systemUTC();
   }
 
-  @PostConstruct
+  @Bean
+  @Primary
   public SentryOptions sentryOptions() {
-    SentryOptions options = context.getBean(SentryOptions.class);
+    SentryOptions options = new SentryOptions();
     options.setEnvironment(environment);
     options.setDsn(sentryDsn);
     options.setTag("service", "MessageService");
@@ -77,6 +80,18 @@ public class AppConfig implements ApplicationContextAware {
     options.setTracesSampleRate(sampleRate);
     options.setSendDefaultPii(false);
     return options;
+  }
+
+  @PostConstruct
+  public void postConstructSentryOptions() {
+    SentryOptions options = context.getBean(SentryOptions.class);
+    options.setEnvironment(environment);
+    options.setDsn(sentryDsn);
+    options.setTag("service", "MessageService");
+    options.setRelease("2.0.0");
+    options.setTracesSampleRate(sampleRate);
+    options.setSendDefaultPii(false);
+    Sentry.init(options);
   }
 
   @Override

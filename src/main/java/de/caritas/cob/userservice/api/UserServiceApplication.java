@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api;
 
 import de.caritas.cob.userservice.api.config.CsrfSecurityProperties;
 import io.sentry.spring.EnableSentry;
+import io.sentry.spring.boot.SentryAutoConfiguration;
 import java.util.concurrent.Executor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -14,7 +15,12 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-@SpringBootApplication(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
+@SpringBootApplication(
+    exclude = {
+      MongoAutoConfiguration.class,
+      MongoDataAutoConfiguration.class,
+      SentryAutoConfiguration.class
+    })
 @EnableAsync
 @EnableScheduling
 @EnableConfigurationProperties({CsrfSecurityProperties.class})
