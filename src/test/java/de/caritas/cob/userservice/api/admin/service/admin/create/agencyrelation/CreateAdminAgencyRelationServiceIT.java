@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.admin.service.admin.create.agencyrelation
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.UserServiceApplication;
@@ -18,14 +17,17 @@ import de.caritas.cob.userservice.api.port.out.AdminRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.List;
 import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
 
+@RunWith(SpringRunner.class)
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -60,36 +62,27 @@ public class CreateAdminAgencyRelationServiceIT {
     assertThat(result, hasSize(1));
   }
 
-  @Test
+  @Test(expected = NoContentException.class)
   public void create_Should_throwNoContentException_When_adminDoesNotExist() {
-    assertThrows(
-        NoContentException.class,
-        () -> {
-          // given
-          CreateAdminAgencyRelationDTO createAdminAgencyRelationDTO =
-              easyRandom.nextObject(CreateAdminAgencyRelationDTO.class);
+    // given
+    CreateAdminAgencyRelationDTO createAdminAgencyRelationDTO =
+        easyRandom.nextObject(CreateAdminAgencyRelationDTO.class);
 
-          // then
-          this.createAdminAgencyRelationService.create("invalid", createAdminAgencyRelationDTO);
-        });
+    // then
+    this.createAdminAgencyRelationService.create("invalid", createAdminAgencyRelationDTO);
   }
 
-  @Test
+  @Test(expected = BadRequestException.class)
   public void create_Should_throwBadRequestException_When_agencyDoesNotExist() {
-    assertThrows(
-        BadRequestException.class,
-        () -> {
-          // given
-          CreateAdminAgencyRelationDTO createAdminAgencyRelationDTO =
-              new CreateAdminAgencyRelationDTO();
-          long agencyId = 99L;
-          createAdminAgencyRelationDTO.setAgencyId(agencyId);
-          when(agencyService.getAgencyWithoutCaching(agencyId))
-              .thenThrow(new BadRequestException("Agency not found"));
+    // given
+    CreateAdminAgencyRelationDTO createAdminAgencyRelationDTO = new CreateAdminAgencyRelationDTO();
+    long agencyId = 99L;
+    createAdminAgencyRelationDTO.setAgencyId(agencyId);
+    when(agencyService.getAgencyWithoutCaching(agencyId))
+        .thenThrow(new BadRequestException("Agency not found"));
 
-          // then
-          createAdminAgencyRelationService.create(VALID_ADMIN_ID, createAdminAgencyRelationDTO);
-        });
+    // then
+    createAdminAgencyRelationService.create(VALID_ADMIN_ID, createAdminAgencyRelationDTO);
   }
 
   private Admin createAdminWithoutAgency() {

@@ -11,7 +11,10 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_I
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -40,22 +43,19 @@ import de.caritas.cob.userservice.messageservice.generated.web.model.AliasOnlyMe
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageDTO;
 import de.caritas.cob.userservice.messageservice.generated.web.model.MessageType;
 import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpHeaders;
-import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClientException;
 
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
-class MessageServiceProviderTest {
+@RunWith(MockitoJUnitRunner.class)
+public class MessageServiceProviderTest {
 
   @InjectMocks private MessageServiceProvider messageServiceProvider;
 
@@ -75,13 +75,13 @@ class MessageServiceProviderTest {
 
   @Mock private MessageServiceApiControllerFactory messageServiceApiControllerFactory;
 
-  @BeforeEach
-  void setUp() {
+  @Before
+  public void setUp() {
     when(messageServiceApiControllerFactory.createControllerApi()).thenReturn(messageControllerApi);
   }
 
   @Test
-  void
+  public void
       postEnquiryMessage_Should_ThrowRocketChatPostMessageExceptionWithExceptionInformation_When_PostRcMessageFails() {
     CreateEnquiryExceptionInformation exceptionInformation =
         mock(CreateEnquiryExceptionInformation.class);
@@ -96,13 +96,13 @@ class MessageServiceProviderTest {
       this.messageServiceProvider.postEnquiryMessage(rocketChatData, exceptionInformation);
       fail("Expected exception: RocketChatPostMessageException");
     } catch (RocketChatPostMessageException exception) {
-      assertTrue(true, "Excepted RocketChatPostMessageException thrown");
+      assertTrue("Excepted RocketChatPostMessageException thrown", true);
       assertNotNull(exception.getExceptionInformation());
     }
   }
 
   @Test
-  void
+  public void
       postEnquiryMessage_Should_CallCreateMessageFromMessageServiceWithCorrectParams_When_EverythingSucceeds()
           throws RocketChatPostMessageException {
     CreateEnquiryExceptionInformation exceptionInformation =
@@ -124,8 +124,9 @@ class MessageServiceProviderTest {
   }
 
   @Test
-  void postWelcomeMessageIfConfigured_ShouldNot_CallMessageService_When_NoWelcomeMessageConfigured()
-      throws RocketChatPostWelcomeMessageException {
+  public void
+      postWelcomeMessageIfConfigured_ShouldNot_CallMessageService_When_NoWelcomeMessageConfigured()
+          throws RocketChatPostWelcomeMessageException {
     CreateEnquiryExceptionInformation exceptionInformation =
         mock(CreateEnquiryExceptionInformation.class);
 
@@ -137,7 +138,7 @@ class MessageServiceProviderTest {
   }
 
   @Test
-  void
+  public void
       postWelcomeMessageIfConfigured_Should_ThrowRocketChatPostMessageExceptionWithExceptionInformation_When_GetSystemUserFails()
           throws RocketChatUserNotInitializedException {
     CreateEnquiryExceptionInformation exceptionInformation =
@@ -149,13 +150,13 @@ class MessageServiceProviderTest {
           RC_GROUP_ID, USER, CONSULTING_TYPE_SETTINGS_U25, exceptionInformation);
       fail("Expected exception: RocketChatPostWelcomeMessageException");
     } catch (RocketChatPostWelcomeMessageException exception) {
-      assertTrue(true, "Excepted RocketChatPostWelcomeMessageException thrown");
+      assertTrue("Excepted RocketChatPostWelcomeMessageException thrown", true);
       assertNotNull(exception.getExceptionInformation());
     }
   }
 
   @Test
-  void
+  public void
       postWelcomeMessageIfConfigured_Should_ThrowRocketChatPostMessageExceptionWithExceptionInformation_When_PostRcMessageFails()
           throws RocketChatUserNotInitializedException {
     CreateEnquiryExceptionInformation exceptionInformation =
@@ -173,13 +174,13 @@ class MessageServiceProviderTest {
           RC_GROUP_ID, USER, CONSULTING_TYPE_SETTINGS_U25, exceptionInformation);
       fail("Expected exception: RocketChatPostWelcomeMessageException");
     } catch (RocketChatPostWelcomeMessageException exception) {
-      assertTrue(true, "Excepted RocketChatPostWelcomeMessageException thrown");
+      assertTrue("Excepted RocketChatPostWelcomeMessageException thrown", true);
       assertNotNull(exception.getExceptionInformation());
     }
   }
 
   @Test
-  void
+  public void
       postWelcomeMessageIfConfigured_Should_CallCreateMessageFromMessageServiceWithCorrectParams_When_EverythingSucceeds()
           throws RocketChatUserNotInitializedException, RocketChatPostWelcomeMessageException {
     EasyRandom easyRandom = new EasyRandom();
@@ -199,13 +200,14 @@ class MessageServiceProviderTest {
 
     verify(messageControllerApi)
         .createMessage(anyString(), anyString(), eq(RC_GROUP_ID), captor.capture());
-    assertFalse(ObjectUtils.isEmpty(USER.getUsername()));
+    assertFalse(StringUtils.isEmpty(USER.getUsername()));
     assertThat(captor.getValue().getMessage(), is("Hallo " + USER.getUsername()));
   }
 
   @Test
-  void postFurtherStepsIfConfigured_ShouldNot_CallMessageService_When_NoFurtherStepsIfConfigured()
-      throws RocketChatPostFurtherStepsMessageException {
+  public void
+      postFurtherStepsIfConfigured_ShouldNot_CallMessageService_When_NoFurtherStepsIfConfigured()
+          throws RocketChatPostFurtherStepsMessageException {
     CreateEnquiryExceptionInformation exceptionInformation =
         mock(CreateEnquiryExceptionInformation.class);
 
@@ -217,30 +219,22 @@ class MessageServiceProviderTest {
     verifyNoInteractions(messageControllerApi);
   }
 
-  @Test
-  void
+  @Test(expected = RocketChatPostFurtherStepsMessageException.class)
+  public void
       postFurtherStepsIfConfigured_Should_ThrowRocketChatPostFurtherStepsMessageExceptionWithExceptionInformation_When_PostRcMessageFails()
           throws RocketChatPostFurtherStepsMessageException {
-    assertThrows(
-        RocketChatPostFurtherStepsMessageException.class,
-        () -> {
-          CreateEnquiryExceptionInformation exceptionInformation =
-              mock(CreateEnquiryExceptionInformation.class);
-          HttpHeaders headers = mock(HttpHeaders.class);
-          when(securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders()).thenReturn(headers);
-          doThrow(restClientException)
-              .when(this.messageControllerApi)
-              .saveAliasOnlyMessage(any(), any());
+    CreateEnquiryExceptionInformation exceptionInformation =
+        mock(CreateEnquiryExceptionInformation.class);
+    HttpHeaders headers = mock(HttpHeaders.class);
+    when(securityHeaderSupplier.getKeycloakAndCsrfHttpHeaders()).thenReturn(headers);
+    doThrow(restClientException).when(this.messageControllerApi).saveAliasOnlyMessage(any(), any());
 
-          this.messageServiceProvider.postFurtherStepsIfConfigured(
-              RC_GROUP_ID,
-              CONSULTING_TYPE_SETTINGS_WITH_FURTHER_STEPS_MESSAGE,
-              exceptionInformation);
-        });
+    this.messageServiceProvider.postFurtherStepsIfConfigured(
+        RC_GROUP_ID, CONSULTING_TYPE_SETTINGS_WITH_FURTHER_STEPS_MESSAGE, exceptionInformation);
   }
 
   @Test
-  void postFurtherStepsIfConfigured_Should_SaveFurtherStepsMessage_When_Configured()
+  public void postFurtherStepsIfConfigured_Should_SaveFurtherStepsMessage_When_Configured()
       throws RocketChatPostFurtherStepsMessageException {
     CreateEnquiryExceptionInformation exceptionInformation =
         mock(CreateEnquiryExceptionInformation.class);

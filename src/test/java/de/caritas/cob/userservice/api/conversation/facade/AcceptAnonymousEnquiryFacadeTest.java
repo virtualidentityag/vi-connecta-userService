@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.conversation.facade;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -15,14 +14,14 @@ import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserAccountService;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
-class AcceptAnonymousEnquiryFacadeTest {
+@RunWith(MockitoJUnitRunner.class)
+public class AcceptAnonymousEnquiryFacadeTest {
 
   @InjectMocks private AcceptAnonymousEnquiryFacade acceptAnonymousEnquiryFacade;
 
@@ -35,7 +34,7 @@ class AcceptAnonymousEnquiryFacadeTest {
   @Mock private UserAccountService userAccountService;
 
   @Test
-  void acceptAnonymousEnquiry_Should_useServicesCorrectly_When_sessionExists() {
+  public void acceptAnonymousEnquiry_Should_useServicesCorrectly_When_sessionExists() {
     Session session = new EasyRandom().nextObject(Session.class);
     when(this.sessionService.getSession(session.getId())).thenReturn(Optional.of(session));
 
@@ -47,12 +46,8 @@ class AcceptAnonymousEnquiryFacadeTest {
         .sendAcceptAnonymousEnquiryEventToUser(session.getUser().getUserId());
   }
 
-  @Test
-  void acceptAnonymousEnquiry_Should_throwNotFoundException_When_sessionDoesNotExist() {
-    assertThrows(
-        NotFoundException.class,
-        () -> {
-          this.acceptAnonymousEnquiryFacade.acceptAnonymousEnquiry(1L);
-        });
+  @Test(expected = NotFoundException.class)
+  public void acceptAnonymousEnquiry_Should_throwNotFoundException_When_sessionDoesNotExist() {
+    this.acceptAnonymousEnquiryFacade.acceptAnonymousEnquiry(1L);
   }
 }

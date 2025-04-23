@@ -3,22 +3,22 @@ package de.caritas.cob.userservice.api.service.httpheader;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class SecurityHeaderSupplierTest {
 
   private final String CSRF_TOKEN_HEADER_VALUE = "X-CSRF-TOKEN";
@@ -28,7 +28,7 @@ public class SecurityHeaderSupplierTest {
   @InjectMocks private SecurityHeaderSupplier securityHeaderSupplier;
   @Mock private AuthenticatedUser authenticatedUser;
 
-  @BeforeEach
+  @Before
   public void setup() throws NoSuchFieldException, SecurityException {
     setField(securityHeaderSupplier, "csrfHeaderProperty", CSRF_TOKEN_HEADER_VALUE);
     setField(securityHeaderSupplier, "csrfCookieProperty", CSRF_TOKEN_COOKIE_VALUE);

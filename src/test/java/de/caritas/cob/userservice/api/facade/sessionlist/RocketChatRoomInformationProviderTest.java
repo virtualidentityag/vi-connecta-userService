@@ -13,7 +13,10 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.ROOMS_UPDA
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.SUBSCRIPTIONS_UPDATE_LIST_DTO_WITH_ONE_FEEDBACK_UNREAD;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERS_ROOMS_LIST;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_DTO_3;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
@@ -23,13 +26,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Objects;
 import org.apache.commons.collections.CollectionUtils;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class RocketChatRoomInformationProviderTest {
 
   @InjectMocks private RocketChatRoomInformationProvider rocketChatRoomInformationProvider;

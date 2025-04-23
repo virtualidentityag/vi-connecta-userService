@@ -15,18 +15,16 @@ import de.caritas.cob.userservice.api.admin.report.model.AgencyDependedViolation
 import de.caritas.cob.userservice.api.admin.report.model.ViolationReportRule;
 import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.ApplicationContext;
 
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
-class ViolationRuleRegistryTest {
+@RunWith(MockitoJUnitRunner.class)
+public class ViolationRuleRegistryTest {
 
   @InjectMocks private ViolationRuleRegistry violationRuleRegistry;
 
@@ -34,8 +32,8 @@ class ViolationRuleRegistryTest {
 
   @Mock private AgencyDependedViolationReportRule agencyDependedViolationReportRule;
 
-  @BeforeEach
-  void setup() {
+  @Before
+  public void setup() {
     Map<String, ViolationReportRule> mockedBeans = mock(Map.class);
     List<ViolationReportRule> mockedRules =
         asList(mock(ViolationReportRule.class), agencyDependedViolationReportRule);
@@ -44,7 +42,7 @@ class ViolationRuleRegistryTest {
   }
 
   @Test
-  void getViolationReportRules_Should_returnRegistratedRules_When_regitryIsInitialized() {
+  public void getViolationReportRules_Should_returnRegistratedRules_When_regitryIsInitialized() {
     this.violationRuleRegistry.initialize();
 
     List<ViolationReportRule> registeredRules =
@@ -55,7 +53,7 @@ class ViolationRuleRegistryTest {
   }
 
   @Test
-  void getViolationReportRules_Should_returnEmptyList_When_regitryIsNotInitialized() {
+  public void getViolationReportRules_Should_returnEmptyList_When_regitryIsNotInitialized() {
     List<ViolationReportRule> registeredRules =
         this.violationRuleRegistry.getViolationReportRules(emptyList());
 

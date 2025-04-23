@@ -4,8 +4,7 @@ import static de.caritas.cob.userservice.api.helper.EmailNotificationUtils.deser
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -36,15 +35,15 @@ import de.caritas.cob.userservice.api.service.statistics.event.DeleteAccountStat
 import java.util.Optional;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class UserAccountServiceTest {
 
   private static final EasyRandom EASY_RANDOM = new EasyRandom();
@@ -110,16 +109,12 @@ public class UserAccountServiceTest {
     assertThat(resultUser).isEqualTo(userMock);
   }
 
-  @Test
+  @Test(expected = InternalServerErrorException.class)
   public void
       retrieveValidatedUser_Should_Throw_InternalServerErrorException_When_UserIsNotPresent() {
-    assertThrows(
-        InternalServerErrorException.class,
-        () -> {
-          when(userService.getUser(any())).thenReturn(Optional.empty());
+    when(userService.getUser(any())).thenReturn(Optional.empty());
 
-          this.accountProvider.retrieveValidatedUser();
-        });
+    this.accountProvider.retrieveValidatedUser();
   }
 
   @Test
@@ -132,16 +127,12 @@ public class UserAccountServiceTest {
     assertThat(resultUser).isEqualTo(consultantMock);
   }
 
-  @Test
+  @Test(expected = InternalServerErrorException.class)
   public void
       retrieveValidatedConsultant_Should_Throw_InternalServerErrorException_When_ConsultantIsNotPresent() {
-    assertThrows(
-        InternalServerErrorException.class,
-        () -> {
-          when(consultantService.getConsultant(any())).thenReturn(Optional.empty());
+    when(consultantService.getConsultant(any())).thenReturn(Optional.empty());
 
-          this.accountProvider.retrieveValidatedConsultant();
-        });
+    this.accountProvider.retrieveValidatedConsultant();
   }
 
   @Test
@@ -156,17 +147,13 @@ public class UserAccountServiceTest {
     assertThat(resultUser).isEqualTo(teamConsultantMock);
   }
 
-  @Test
+  @Test(expected = ForbiddenException.class)
   public void
       retrieveValidatedTeamConsultant_Should_Throw_ForbiddenException_When_ConsultantIsNotATeamConsultant() {
-    assertThrows(
-        ForbiddenException.class,
-        () -> {
-          Consultant consultantMock = mock(Consultant.class);
-          when(consultantService.getConsultant(any())).thenReturn(Optional.of(consultantMock));
+    Consultant consultantMock = mock(Consultant.class);
+    when(consultantService.getConsultant(any())).thenReturn(Optional.of(consultantMock));
 
-          this.accountProvider.retrieveValidatedTeamConsultant();
-        });
+    this.accountProvider.retrieveValidatedTeamConsultant();
   }
 
   @Test

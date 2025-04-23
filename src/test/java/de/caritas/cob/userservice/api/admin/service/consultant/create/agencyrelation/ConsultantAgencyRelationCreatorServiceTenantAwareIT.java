@@ -37,9 +37,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -48,9 +49,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+@RunWith(SpringRunner.class)
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -81,12 +84,12 @@ public class ConsultantAgencyRelationCreatorServiceTenantAwareIT {
 
   @MockBean private ConsultingTypeManager consultingTypeManager;
 
-  @BeforeEach
+  @Before
   public void beforeTests() {
     TenantContext.setCurrentTenant(1L);
   }
 
-  @AfterEach
+  @After
   public void afterTests() {
     TenantContext.clear();
   }

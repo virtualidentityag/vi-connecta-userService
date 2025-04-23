@@ -34,19 +34,22 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.iterators.PeekingIterator;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
 
+@RunWith(SpringRunner.class)
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-class ArchivedTeamSessionConversationListProviderTestIT {
+public class ArchivedTeamSessionConversationListProviderTestIT {
 
   @Autowired
   private ArchivedTeamSessionConversationListProvider archivedTeamSessionConversationListProvider;
@@ -61,15 +64,15 @@ class ArchivedTeamSessionConversationListProviderTestIT {
 
   @MockBean private UserAccountService userAccountProvider;
 
-  @AfterEach
-  void cleanDatabase() {
+  @After
+  public void cleanDatabase() {
     this.sessionRepository.deleteAll();
     this.consultantAgencyRepository.deleteAll();
     this.consultantRepository.deleteAll();
   }
 
   @Test
-  void
+  public void
       buildConversations_Should_returnExpectedResponseDTO_When_consultantHasArchivedTeamSessions() {
     saveTestData(10);
     PageableListRequest request = PageableListRequest.builder().count(5).offset(0).build();
@@ -84,7 +87,7 @@ class ArchivedTeamSessionConversationListProviderTestIT {
   }
 
   @Test
-  void buildConversations_Should_returnExpectedElements_When_paginationParamsAreAtTheEnd() {
+  public void buildConversations_Should_returnExpectedElements_When_paginationParamsAreAtTheEnd() {
     saveTestData(10);
     PageableListRequest request = PageableListRequest.builder().count(3).offset(9).build();
 
@@ -98,7 +101,7 @@ class ArchivedTeamSessionConversationListProviderTestIT {
   }
 
   @Test
-  void buildConversations_Should_returnElementsInExpectedOrder() {
+  public void buildConversations_Should_returnElementsInExpectedOrder() {
     saveTestData(100);
     PageableListRequest request = PageableListRequest.builder().count(100).offset(0).build();
 
@@ -117,7 +120,7 @@ class ArchivedTeamSessionConversationListProviderTestIT {
   }
 
   @Test
-  void providedType_Should_return_archivedTeamSession() {
+  public void providedType_Should_return_archivedTeamSession() {
     ConversationListType conversationListType =
         this.archivedTeamSessionConversationListProvider.providedType();
 

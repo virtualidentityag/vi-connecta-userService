@@ -10,6 +10,7 @@ import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErro
 import de.caritas.cob.userservice.api.service.DecryptionService;
 import de.caritas.cob.userservice.api.service.LogService;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /** Analyser methods for the session list. */
@@ -18,6 +19,7 @@ public class SessionListAnalyser {
 
   private final DecryptionService decryptionService;
 
+  @Autowired
   public SessionListAnalyser(DecryptionService decryptionService) {
     this.decryptionService = requireNonNull(decryptionService);
   }

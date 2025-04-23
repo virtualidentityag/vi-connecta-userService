@@ -6,7 +6,8 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -20,13 +21,13 @@ import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ConsultantAgencyDeletionValidationServiceTest {
 
   @InjectMocks private ConsultantAgencyDeletionValidationService agencyDeletionValidationService;
@@ -79,21 +80,17 @@ public class ConsultantAgencyDeletionValidationServiceTest {
     }
   }
 
-  @Test
+  @Test(expected = InternalServerErrorException.class)
   public void
       validateForDeletion_Should_throwInternalServerErrorException_When_agencyCanNotBeFetched() {
-    assertThrows(
-        InternalServerErrorException.class,
-        () -> {
-          ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
-          consultantAgency.setDeleteDate(null);
-          when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
-              .thenReturn(singletonList(consultantAgency));
-          when(this.agencyService.getAgencyWithoutCaching(any()))
-              .thenThrow(new InternalServerErrorException(""));
+    ConsultantAgency consultantAgency = new EasyRandom().nextObject(ConsultantAgency.class);
+    consultantAgency.setDeleteDate(null);
+    when(this.consultantAgencyRepository.findByAgencyIdAndDeleteDateIsNull(any()))
+        .thenReturn(singletonList(consultantAgency));
+    when(this.agencyService.getAgencyWithoutCaching(any()))
+        .thenThrow(new InternalServerErrorException(""));
 
-          this.agencyDeletionValidationService.validateAndMarkForDeletion(consultantAgency);
-        });
+    this.agencyDeletionValidationService.validateAndMarkForDeletion(consultantAgency);
   }
 
   @Test

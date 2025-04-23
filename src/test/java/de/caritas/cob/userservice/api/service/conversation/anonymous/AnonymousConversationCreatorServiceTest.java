@@ -6,7 +6,6 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_DTO_SUCHT;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -33,14 +32,14 @@ import de.caritas.cob.userservice.api.service.session.SessionService;
 import de.caritas.cob.userservice.api.service.user.UserService;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit4.SpringRunner;
 
-@ExtendWith(SpringExtension.class)
-class AnonymousConversationCreatorServiceTest {
+@RunWith(SpringRunner.class)
+public class AnonymousConversationCreatorServiceTest {
 
   @InjectMocks private AnonymousConversationCreatorService anonymousConversationCreatorService;
   @Mock private UserService userService;
@@ -53,88 +52,70 @@ class AnonymousConversationCreatorServiceTest {
 
   EasyRandom easyRandom = new EasyRandom();
 
-  @Test
-  void
+  @Test(expected = InternalServerErrorException.class)
+  public void
       createAnonymousConversation_Should_ThrowInternalServerErrorException_When_ProvidedUserDoesNotExist() {
-    assertThrows(
-        InternalServerErrorException.class,
-        () -> {
-          when(userService.getUser(anyString())).thenReturn(Optional.empty());
-          AnonymousUserCredentials credentials =
-              easyRandom.nextObject(AnonymousUserCredentials.class);
+    when(userService.getUser(anyString())).thenReturn(Optional.empty());
+    AnonymousUserCredentials credentials = easyRandom.nextObject(AnonymousUserCredentials.class);
 
-          anonymousConversationCreatorService.createAnonymousConversation(
-              USER_DTO_SUCHT, credentials);
+    anonymousConversationCreatorService.createAnonymousConversation(USER_DTO_SUCHT, credentials);
 
-          verifyNoInteractions(sessionService);
-          verifyNoInteractions(rollbackFacade);
-          verifyNoInteractions(createEnquiryMessageFacade);
-          verifyNoInteractions(agencyService);
-          verifyNoInteractions(consultantAgencyService);
-          verifyNoInteractions(liveEventNotificationService);
-        });
+    verifyNoInteractions(sessionService);
+    verifyNoInteractions(rollbackFacade);
+    verifyNoInteractions(createEnquiryMessageFacade);
+    verifyNoInteractions(agencyService);
+    verifyNoInteractions(consultantAgencyService);
+    verifyNoInteractions(liveEventNotificationService);
   }
 
-  @Test
-  void
+  @Test(expected = InternalServerErrorException.class)
+  public void
       createAnonymousConversation_Should_ThrowInternalServerErrorExceptionAndPerformRollback_When_InitializingSessionFails() {
-    assertThrows(
-        InternalServerErrorException.class,
-        () -> {
-          when(userService.getUser(anyString())).thenReturn(Optional.of(USER));
-          when(sessionService.initializeSession(
-                  any(User.class),
-                  any(UserDTO.class),
-                  anyBoolean(),
-                  any(RegistrationType.class),
-                  any(SessionStatus.class)))
-              .thenThrow(new IllegalArgumentException());
-          AnonymousUserCredentials credentials =
-              easyRandom.nextObject(AnonymousUserCredentials.class);
+    when(userService.getUser(anyString())).thenReturn(Optional.of(USER));
+    when(sessionService.initializeSession(
+            any(User.class),
+            any(UserDTO.class),
+            anyBoolean(),
+            any(RegistrationType.class),
+            any(SessionStatus.class)))
+        .thenThrow(new IllegalArgumentException());
+    AnonymousUserCredentials credentials = easyRandom.nextObject(AnonymousUserCredentials.class);
 
-          anonymousConversationCreatorService.createAnonymousConversation(
-              USER_DTO_SUCHT, credentials);
+    anonymousConversationCreatorService.createAnonymousConversation(USER_DTO_SUCHT, credentials);
 
-          verifyNoInteractions(rollbackFacade);
-          verifyNoInteractions(createEnquiryMessageFacade);
-          verifyNoInteractions(agencyService);
-          verifyNoInteractions(consultantAgencyService);
-          verifyNoInteractions(liveEventNotificationService);
-        });
+    verifyNoInteractions(rollbackFacade);
+    verifyNoInteractions(createEnquiryMessageFacade);
+    verifyNoInteractions(agencyService);
+    verifyNoInteractions(consultantAgencyService);
+    verifyNoInteractions(liveEventNotificationService);
   }
 
-  @Test
-  void
+  @Test(expected = InternalServerErrorException.class)
+  public void
       createAnonymousConversation_Should_ThrowInternalServerErrorExceptionAndPerformRollback_When_CreateRcRoomFails()
           throws CreateEnquiryException {
-    assertThrows(
-        InternalServerErrorException.class,
-        () -> {
-          when(userService.getUser(anyString())).thenReturn(Optional.of(USER));
-          when(sessionService.initializeSession(
-                  any(User.class),
-                  any(UserDTO.class),
-                  anyBoolean(),
-                  any(RegistrationType.class),
-                  any(SessionStatus.class)))
-              .thenReturn(SESSION);
-          CreateEnquiryException exception = easyRandom.nextObject(CreateEnquiryException.class);
-          when(createEnquiryMessageFacade.createRocketChatRoomAndAddUsers(any(), any(), any()))
-              .thenThrow(exception);
-          AnonymousUserCredentials credentials =
-              easyRandom.nextObject(AnonymousUserCredentials.class);
+    when(userService.getUser(anyString())).thenReturn(Optional.of(USER));
+    when(sessionService.initializeSession(
+            any(User.class),
+            any(UserDTO.class),
+            anyBoolean(),
+            any(RegistrationType.class),
+            any(SessionStatus.class)))
+        .thenReturn(SESSION);
+    CreateEnquiryException exception = easyRandom.nextObject(CreateEnquiryException.class);
+    when(createEnquiryMessageFacade.createRocketChatRoomAndAddUsers(any(), any(), any()))
+        .thenThrow(exception);
+    AnonymousUserCredentials credentials = easyRandom.nextObject(AnonymousUserCredentials.class);
 
-          anonymousConversationCreatorService.createAnonymousConversation(
-              USER_DTO_SUCHT, credentials);
+    anonymousConversationCreatorService.createAnonymousConversation(USER_DTO_SUCHT, credentials);
 
-          verifyNoInteractions(agencyService);
-          verifyNoInteractions(consultantAgencyService);
-          verifyNoInteractions(liveEventNotificationService);
-        });
+    verifyNoInteractions(agencyService);
+    verifyNoInteractions(consultantAgencyService);
+    verifyNoInteractions(liveEventNotificationService);
   }
 
   @Test
-  void createAnonymousConversation_Should_ReturnSessionAndTriggerLiveEvent()
+  public void createAnonymousConversation_Should_ReturnSessionAndTriggerLiveEvent()
       throws CreateEnquiryException {
     when(userService.getUser(anyString())).thenReturn(Optional.of(USER));
     when(sessionService.initializeSession(

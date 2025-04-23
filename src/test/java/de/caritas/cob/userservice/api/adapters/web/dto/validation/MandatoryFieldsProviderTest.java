@@ -4,21 +4,20 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_U25;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITHOUT_REGISTRATION;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS_NULL;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
 import de.caritas.cob.userservice.api.manager.consultingtype.registration.mandatoryfields.MandatoryFields;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class MandatoryFieldsProviderTest {
 
   @InjectMocks private MandatoryFieldsProvider mandatoryFieldsProvider;
@@ -41,31 +40,23 @@ public class MandatoryFieldsProviderTest {
         result.isState());
   }
 
-  @Test
+  @Test(expected = InternalServerErrorException.class)
   public void
       fetchMandatoryFieldsForConsultingType_Should_ThrowInternalServerError_WhenRegistrationIsNull() {
-    assertThrows(
-        InternalServerErrorException.class,
-        () -> {
-          when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
-              .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_REGISTRATION);
-          MandatoryFields result =
-              mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(
-                  Integer.toString(CONSULTING_TYPE_ID_U25));
-        });
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_WITHOUT_REGISTRATION);
+    MandatoryFields result =
+        mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(
+            Integer.toString(CONSULTING_TYPE_ID_U25));
   }
 
-  @Test
+  @Test(expected = InternalServerErrorException.class)
   public void
       fetchMandatoryFieldsForConsultingType_Should_ThrowInternalServerError_WhenMandatoryFieldsIsNull() {
-    assertThrows(
-        InternalServerErrorException.class,
-        () -> {
-          when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
-              .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS_NULL);
-          MandatoryFields result =
-              mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(
-                  Integer.toString(CONSULTING_TYPE_ID_U25));
-        });
+    when(consultingTypeManager.getConsultingTypeSettings(Mockito.any()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_WITH_MANDATORY_FIELDS_NULL);
+    MandatoryFields result =
+        mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(
+            Integer.toString(CONSULTING_TYPE_ID_U25));
   }
 }

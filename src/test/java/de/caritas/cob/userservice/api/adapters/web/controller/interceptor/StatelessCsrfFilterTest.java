@@ -16,16 +16,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.web.access.AccessDeniedHandler;
 
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
+@RunWith(MockitoJUnitRunner.class)
 public class StatelessCsrfFilterTest {
 
   private static final String CSRF_HEADER = "csrfHeader";
@@ -45,7 +43,7 @@ public class StatelessCsrfFilterTest {
 
   @Mock private AccessDeniedHandler accessDeniedHandler;
 
-  @BeforeEach
+  @Before
   public void setup() {
     ConfigProperty cookieProperty = new ConfigProperty();
     cookieProperty.setProperty(CSRF_COOKIE);

@@ -4,7 +4,9 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_DTO
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_KREUZBUND;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -14,14 +16,14 @@ import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestExceptio
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit4.SpringRunner;
 
-@ExtendWith(SpringExtension.class)
-class AgencyVerifierTest {
+@RunWith(SpringRunner.class)
+public class AgencyVerifierTest {
 
   @InjectMocks private AgencyVerifier agencyVerifier;
 
@@ -30,7 +32,8 @@ class AgencyVerifierTest {
   private final EasyRandom easyRandom = new EasyRandom();
 
   @Test
-  void getVerifiedAgency_Should_ThrowInternalServerErrorException_When_AgencyServiceHelperFails() {
+  public void
+      getVerifiedAgency_Should_ThrowInternalServerErrorException_When_AgencyServiceHelperFails() {
     when(agencyService.getAgencyWithoutCaching(AGENCY_ID))
         .thenThrow(new InternalServerErrorException(""));
 
@@ -38,12 +41,12 @@ class AgencyVerifierTest {
       agencyVerifier.getVerifiedAgency(AGENCY_ID, 0);
       fail("Expected exception: InternalServerErrorException");
     } catch (InternalServerErrorException serviceException) {
-      assertTrue(true, "Excepted InternalServerErrorException thrown");
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
   @Test
-  void
+  public void
       getVerifiedAgency_Should_ThrowBadRequestException_When_AgencyIsNotAssignedToGivenConsultingType() {
     when(agencyService.getAgencyWithoutCaching(AGENCY_ID)).thenReturn(AGENCY_DTO_SUCHT);
 
@@ -51,34 +54,30 @@ class AgencyVerifierTest {
       agencyVerifier.getVerifiedAgency(AGENCY_ID, 15);
       fail("Expected exception: BadRequestException");
     } catch (BadRequestException badRequestException) {
-      assertTrue(true, "Excepted BadRequestException thrown");
+      assertTrue("Excepted BadRequestException thrown", true);
     }
   }
 
   @Test
-  void getVerifiedAgency_Should_ReturnCorrectAgency_When_AgencyIsFoundAndValid() {
+  public void getVerifiedAgency_Should_ReturnCorrectAgency_When_AgencyIsFoundAndValid() {
     when(agencyService.getAgencyWithoutCaching(AGENCY_ID)).thenReturn(AGENCY_DTO_SUCHT);
     AgencyDTO agency = agencyVerifier.getVerifiedAgency(AGENCY_ID, 0);
 
     assertEquals(AGENCY_ID, agency.getId());
   }
 
-  @Test
-  void
+  @Test(expected = BadRequestException.class)
+  public void
       checkIfConsultingTypeMatchesToAgency_Should_ThrowBadRequestException_When_ConsultingTypeDoesNotMatchToAgency() {
-    assertThrows(
-        BadRequestException.class,
-        () -> {
-          when(agencyService.getAgencyWithoutCaching(any())).thenReturn(AGENCY_DTO_SUCHT);
+    when(agencyService.getAgencyWithoutCaching(any())).thenReturn(AGENCY_DTO_SUCHT);
 
-          UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
-          userDTO.setConsultingType(String.valueOf(CONSULTING_TYPE_ID_KREUZBUND));
-          agencyVerifier.checkIfConsultingTypeMatchesToAgency(userDTO);
-        });
+    UserDTO userDTO = easyRandom.nextObject(UserDTO.class);
+    userDTO.setConsultingType(String.valueOf(CONSULTING_TYPE_ID_KREUZBUND));
+    agencyVerifier.checkIfConsultingTypeMatchesToAgency(userDTO);
   }
 
   @Test
-  void
+  public void
       checkIfConsultingTypeMatchesToAgency_ShouldNot_ThrowException_When_ConsultingTypeMatchesToAgency() {
     when(agencyService.getAgencyWithoutCaching(any())).thenReturn(AGENCY_DTO_SUCHT);
 

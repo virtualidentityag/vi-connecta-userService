@@ -2,7 +2,6 @@ package de.caritas.cob.userservice.api.service.archive;
 
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_ID;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -26,17 +25,17 @@ import de.caritas.cob.userservice.api.service.statistics.event.ArchiveOrDeleteSe
 import de.caritas.cob.userservice.api.service.statistics.event.StatisticsEvent;
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class SessionArchiveServiceTest {
 
   @InjectMocks SessionArchiveService sessionArchiveService;
@@ -64,53 +63,44 @@ public class SessionArchiveServiceTest {
 
   @Mock private Logger logger;
 
-  @BeforeEach
+  @Before
   public void setUp() {
     setInternalState(SessionArchiveService.class, "log", logger);
   }
 
-  @Test
+  @Test(expected = NotFoundException.class)
   public void archiveSession_Should_ThrowNotFoundException_WhenSessionIsNotFound() {
-    assertThrows(
-        NotFoundException.class,
-        () -> {
-          when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.empty());
 
-          sessionArchiveService.archiveSession(SESSION_ID);
-        });
+    when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.empty());
+
+    sessionArchiveService.archiveSession(SESSION_ID);
   }
 
-  @Test
+  @Test(expected = ConflictException.class)
   public void
       archiveSession_Should_ThrowConflictException_WhenSessionShouldBeArchivedAndIsNotInProgress() {
-    assertThrows(
-        ConflictException.class,
-        () -> {
-          Session session = Mockito.mock(Session.class);
-          when(session.isAdvised(any())).thenReturn(true);
-          when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
-          doThrow(new ConflictException("Conflict"))
-              .when(sessionArchiveValidator)
-              .isValidForArchiving(session);
 
-          sessionArchiveService.archiveSession(SESSION_ID);
-          verify(session, times(0)).setStatus(SessionStatus.IN_ARCHIVE);
-        });
+    Session session = Mockito.mock(Session.class);
+    when(session.isAdvised(any())).thenReturn(true);
+    when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
+    doThrow(new ConflictException("Conflict"))
+        .when(sessionArchiveValidator)
+        .isValidForArchiving(session);
+
+    sessionArchiveService.archiveSession(SESSION_ID);
+    verify(session, times(0)).setStatus(SessionStatus.IN_ARCHIVE);
   }
 
-  @Test
+  @Test(expected = ForbiddenException.class)
   public void
       archiveSession_Should_ThrowForbiddenException_WhenConsultantHasaNoAuthorizationForTheSession() {
-    assertThrows(
-        ForbiddenException.class,
-        () -> {
-          Session session = Mockito.mock(Session.class);
-          when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
 
-          sessionArchiveService.archiveSession(SESSION_ID);
+    Session session = Mockito.mock(Session.class);
+    when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
 
-          verify(session, times(0)).setStatus(SessionStatus.IN_ARCHIVE);
-        });
+    sessionArchiveService.archiveSession(SESSION_ID);
+
+    verify(session, times(0)).setStatus(SessionStatus.IN_ARCHIVE);
   }
 
   @Test
@@ -125,19 +115,16 @@ public class SessionArchiveServiceTest {
     verify(session, times(1)).setStatus(SessionStatus.IN_ARCHIVE);
   }
 
-  @Test
+  @Test(expected = ForbiddenException.class)
   public void
       archiveSession_Should_ThrowForbiddenException_WhenUserHasNoAuthorizationForTheSession() {
-    assertThrows(
-        ForbiddenException.class,
-        () -> {
-          Session session = Mockito.mock(Session.class);
-          when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
 
-          sessionArchiveService.archiveSession(SESSION_ID);
+    Session session = Mockito.mock(Session.class);
+    when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
 
-          verify(session, times(0)).setStatus(SessionStatus.IN_ARCHIVE);
-        });
+    sessionArchiveService.archiveSession(SESSION_ID);
+
+    verify(session, times(0)).setStatus(SessionStatus.IN_ARCHIVE);
   }
 
   @Test
@@ -184,77 +171,61 @@ public class SessionArchiveServiceTest {
         .error("Could not create session archive statistics event", illegalStateException);
   }
 
-  @Test
+  @Test(expected = NotFoundException.class)
   public void dearchiveSession_Should_ThrowNotFoundException_WhenSessionIsNotFound() {
-    assertThrows(
-        NotFoundException.class,
-        () -> {
-          when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.empty());
-          sessionArchiveService.dearchiveSession(SESSION_ID);
-        });
+    when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.empty());
+    sessionArchiveService.dearchiveSession(SESSION_ID);
   }
 
-  @Test
+  @Test(expected = ConflictException.class)
   public void
       dearchiveSession_Should_ThrowConflictException_WhenSessionShouldBeReactivatedAndIsAlreadyInProgress() {
-    assertThrows(
-        ConflictException.class,
-        () -> {
-          Session session = Mockito.mock(Session.class);
-          when(session.isAdvised(any())).thenReturn(true);
-          when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
-          doThrow(new ConflictException("Conflict"))
-              .when(sessionArchiveValidator)
-              .isValidForDearchiving(session);
 
-          sessionArchiveService.dearchiveSession(SESSION_ID);
+    Session session = Mockito.mock(Session.class);
+    when(session.isAdvised(any())).thenReturn(true);
+    when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
+    doThrow(new ConflictException("Conflict"))
+        .when(sessionArchiveValidator)
+        .isValidForDearchiving(session);
 
-          verify(session, times(0)).setStatus(SessionStatus.IN_PROGRESS);
-        });
+    sessionArchiveService.dearchiveSession(SESSION_ID);
+
+    verify(session, times(0)).setStatus(SessionStatus.IN_PROGRESS);
   }
 
-  @Test
+  @Test(expected = ForbiddenException.class)
   public void
       dearchiveSession_Should_ThrowForbiddenException_WhenConsultantHasNoAuthorizationForTheSession() {
-    assertThrows(
-        ForbiddenException.class,
-        () -> {
-          Session session = Mockito.mock(Session.class);
-          when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
 
-          sessionArchiveService.dearchiveSession(SESSION_ID);
+    Session session = Mockito.mock(Session.class);
+    when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
 
-          verify(session, times(0)).setStatus(SessionStatus.IN_PROGRESS);
-        });
+    sessionArchiveService.dearchiveSession(SESSION_ID);
+
+    verify(session, times(0)).setStatus(SessionStatus.IN_PROGRESS);
   }
 
-  @Test
+  @Test(expected = ForbiddenException.class)
   public void
       dearchiveSession_Should_ThrowForbiddenException_WhenSessionIsNotTeamSessionAndConsultantNotAssigned() {
-    assertThrows(
-        ForbiddenException.class,
-        () -> {
-          Session session = Mockito.mock(Session.class);
-          when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
 
-          sessionArchiveService.dearchiveSession(SESSION_ID);
+    Session session = Mockito.mock(Session.class);
+    when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
 
-          verify(session, times(1)).setStatus(SessionStatus.IN_ARCHIVE);
-        });
+    sessionArchiveService.dearchiveSession(SESSION_ID);
+
+    verify(session, times(1)).setStatus(SessionStatus.IN_ARCHIVE);
   }
 
-  @Test
+  @Test(expected = ForbiddenException.class)
   public void dearchiveSession_Should_ThrowForbiddenException_WhenNoConsultantOrUserRole() {
-    assertThrows(
-        ForbiddenException.class,
-        () -> {
-          Session session = Mockito.mock(Session.class);
-          when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
 
-          sessionArchiveService.dearchiveSession(SESSION_ID);
+    Session session = Mockito.mock(Session.class);
+    when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
 
-          verify(session, times(0)).setStatus(SessionStatus.IN_PROGRESS);
-        });
+    sessionArchiveService.dearchiveSession(SESSION_ID);
+
+    verify(session, times(0)).setStatus(SessionStatus.IN_PROGRESS);
   }
 
   @Test
@@ -268,19 +239,16 @@ public class SessionArchiveServiceTest {
     verify(session, times(1)).setStatus(SessionStatus.IN_PROGRESS);
   }
 
-  @Test
+  @Test(expected = ForbiddenException.class)
   public void
       dearchiveSession_Should_ThrowForbiddenException_WhenUserHasNoAuthorizationForTheSession() {
-    assertThrows(
-        ForbiddenException.class,
-        () -> {
-          Session session = Mockito.mock(Session.class);
-          when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
 
-          sessionArchiveService.dearchiveSession(SESSION_ID);
+    Session session = Mockito.mock(Session.class);
+    when(sessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
 
-          verify(session, times(1)).setStatus(SessionStatus.IN_ARCHIVE);
-        });
+    sessionArchiveService.dearchiveSession(SESSION_ID);
+
+    verify(session, times(1)).setStatus(SessionStatus.IN_ARCHIVE);
   }
 
   @Test

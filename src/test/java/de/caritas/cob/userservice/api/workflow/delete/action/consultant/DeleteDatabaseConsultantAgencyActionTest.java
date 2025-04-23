@@ -20,15 +20,15 @@ import de.caritas.cob.userservice.api.workflow.delete.model.ConsultantDeletionWo
 import de.caritas.cob.userservice.api.workflow.delete.model.DeletionWorkflowError;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class DeleteDatabaseConsultantAgencyActionTest {
 
   @InjectMocks private DeleteDatabaseConsultantAgencyAction deleteDatabaseConsultantAgencyAction;
@@ -37,7 +37,7 @@ public class DeleteDatabaseConsultantAgencyActionTest {
 
   @Mock private Logger logger;
 
-  @BeforeEach
+  @Before
   public void setup() {
     setInternalState(DeleteDatabaseConsultantAgencyAction.class, "log", logger);
   }

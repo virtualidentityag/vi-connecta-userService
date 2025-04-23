@@ -11,7 +11,6 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -43,15 +42,15 @@ import de.caritas.cob.userservice.api.tenant.TenantContext;
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.ExtendedConsultingTypeResponseDTO;
 import de.caritas.cob.userservice.tenantservice.generated.web.model.RestrictedTenantDTO;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class CreateUserFacadeTest {
 
   @InjectMocks private CreateUserFacade createUserFacade;
@@ -86,19 +85,15 @@ public class CreateUserFacadeTest {
     }
   }
 
-  @Test
+  @Test(expected = BadRequestException.class)
   public void
       createUserAccountWithInitializedConsultingType_Should_ThrowBadRequest_When_ProvidedConsultingTypeDoesNotMatchAgency() {
-    assertThrows(
-        BadRequestException.class,
-        () -> {
-          doNothing().when(userVerifier).checkIfUsernameIsAvailable(any());
-          doThrow(new BadRequestException(ERROR))
-              .when(agencyVerifier)
-              .checkIfConsultingTypeMatchesToAgency(any());
+    doNothing().when(userVerifier).checkIfUsernameIsAvailable(any());
+    doThrow(new BadRequestException(ERROR))
+        .when(agencyVerifier)
+        .checkIfConsultingTypeMatchesToAgency(any());
 
-          createUserFacade.createUserAccountWithInitializedConsultingType(USER_DTO_SUCHT);
-        });
+    createUserFacade.createUserAccountWithInitializedConsultingType(USER_DTO_SUCHT);
   }
 
   @Test
@@ -119,17 +114,14 @@ public class CreateUserFacadeTest {
     }
   }
 
-  @Test
+  @Test(expected = InternalServerErrorException.class)
   public void
       createUserAccountWithInitializedConsultingType_Should_ThrowInternalServerErrorException_When_CreateKeycloakUserReturnsNoUserId() {
-    assertThrows(
-        InternalServerErrorException.class,
-        () -> {
-          when(keycloakService.createKeycloakUser(any()))
-              .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITHOUT_USER_ID);
 
-          createUserFacade.createUserAccountWithInitializedConsultingType(USER_DTO_SUCHT);
-        });
+    when(keycloakService.createKeycloakUser(any()))
+        .thenReturn(KEYCLOAK_CREATE_USER_RESPONSE_DTO_WITHOUT_USER_ID);
+
+    createUserFacade.createUserAccountWithInitializedConsultingType(USER_DTO_SUCHT);
   }
 
   @Test
@@ -193,53 +185,39 @@ public class CreateUserFacadeTest {
     verify(rollbackFacade, times(0)).rollBackUserAccount(any());
   }
 
-  @Test
+  @Test(expected = InternalServerErrorException.class)
   public void
       updateKeycloakAccountAndCreateDatabaseUserAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_UpdateKeycloakPwFails() {
-    assertThrows(
-        InternalServerErrorException.class,
-        () -> {
-          doThrow(new RuntimeException())
-              .when(keycloakService)
-              .updatePassword(anyString(), anyString());
+    doThrow(new RuntimeException()).when(keycloakService).updatePassword(anyString(), anyString());
 
-          createUserFacade.updateIdentityAndCreateAccount(USER_ID, USER_DTO_SUCHT, UserRole.USER);
+    createUserFacade.updateIdentityAndCreateAccount(USER_ID, USER_DTO_SUCHT, UserRole.USER);
 
-          verify(rollbackFacade, times(1)).rollBackUserAccount(any());
-        });
+    verify(rollbackFacade, times(1)).rollBackUserAccount(any());
   }
 
-  @Test
+  @Test(expected = InternalServerErrorException.class)
   public void
       updateKeycloakAccountAndCreateDatabaseUserAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_UpdateKeycloakRoleFails() {
-    assertThrows(
-        InternalServerErrorException.class,
-        () -> {
-          doThrow(new RuntimeException())
-              .when(keycloakService)
-              .updateRole(anyString(), any(UserRole.class));
+    doThrow(new RuntimeException())
+        .when(keycloakService)
+        .updateRole(anyString(), any(UserRole.class));
 
-          createUserFacade.updateIdentityAndCreateAccount(USER_ID, USER_DTO_SUCHT, UserRole.USER);
+    createUserFacade.updateIdentityAndCreateAccount(USER_ID, USER_DTO_SUCHT, UserRole.USER);
 
-          verify(rollbackFacade, times(1)).rollBackUserAccount(any());
-        });
+    verify(rollbackFacade, times(1)).rollBackUserAccount(any());
   }
 
-  @Test
+  @Test(expected = InternalServerErrorException.class)
   public void
       updateKeycloakAccountAndCreateDatabaseUserAccount_Should_ThrowInternalServerErrorExceptionAndRollbackUserAccount_When_CreateDbUserFails() {
-    assertThrows(
-        InternalServerErrorException.class,
-        () -> {
-          when(consultingTypeManager.getConsultingTypeSettings(any()))
-              .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
-          doNothing().when(keycloakService).updatePassword(anyString(), anyString());
-          when(userService.createUser(any(), any(), any(), any(), anyBoolean(), any()))
-              .thenThrow(new IllegalArgumentException());
+    when(consultingTypeManager.getConsultingTypeSettings(any()))
+        .thenReturn(CONSULTING_TYPE_SETTINGS_KREUZBUND);
+    doNothing().when(keycloakService).updatePassword(anyString(), anyString());
+    when(userService.createUser(any(), any(), any(), any(), anyBoolean(), any()))
+        .thenThrow(new IllegalArgumentException());
 
-          createUserFacade.updateIdentityAndCreateAccount(USER_ID, USER_DTO_SUCHT, UserRole.USER);
+    createUserFacade.updateIdentityAndCreateAccount(USER_ID, USER_DTO_SUCHT, UserRole.USER);
 
-          verify(rollbackFacade, times(1)).rollBackUserAccount(any());
-        });
+    verify(rollbackFacade, times(1)).rollBackUserAccount(any());
   }
 }

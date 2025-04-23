@@ -4,7 +4,6 @@ import static de.caritas.cob.userservice.api.conversation.model.ConversationList
 import static de.caritas.cob.userservice.api.conversation.model.ConversationListType.REGISTERED_ENQUIRY;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -14,25 +13,23 @@ import de.caritas.cob.userservice.api.conversation.provider.ConversationListProv
 import de.caritas.cob.userservice.api.conversation.provider.RegisteredEnquiryConversationListProvider;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.ApplicationContext;
 
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = org.mockito.quality.Strictness.LENIENT)
-class ConversationListProviderRegistryTest {
+@RunWith(MockitoJUnitRunner.class)
+public class ConversationListProviderRegistryTest {
 
   @InjectMocks private ConversationListProviderRegistry conversationListProviderRegistry;
 
   @Mock private ApplicationContext applicationContext;
 
-  @BeforeEach
-  void setup() {
+  @Before
+  public void setup() {
     ConversationListProvider anonymous = mock(AnonymousEnquiryConversationListProvider.class);
     when(anonymous.providedType()).thenReturn(ANONYMOUS_ENQUIRY);
     ConversationListProvider registered = mock(RegisteredEnquiryConversationListProvider.class);
@@ -41,17 +38,13 @@ class ConversationListProviderRegistryTest {
         .thenReturn(Map.of("anonymous", anonymous, "registered", registered));
   }
 
-  @Test
-  void findByConversationType_Should_throwNPE_When_registryIsNotInitialized() {
-    assertThrows(
-        NullPointerException.class,
-        () -> {
-          this.conversationListProviderRegistry.findByConversationType(ANONYMOUS_ENQUIRY);
-        });
+  @Test(expected = NullPointerException.class)
+  public void findByConversationType_Should_throwNPE_When_registryIsNotInitialized() {
+    this.conversationListProviderRegistry.findByConversationType(ANONYMOUS_ENQUIRY);
   }
 
   @Test
-  void
+  public void
       findByConversationType_Should_returnAnonymousEnquiryProvider_When_requestedTypeIsAnonymouseEnquiry() {
     this.conversationListProviderRegistry.initializeConversationSuppliers();
 
@@ -63,7 +56,7 @@ class ConversationListProviderRegistryTest {
   }
 
   @Test
-  void
+  public void
       findByConversationType_Should_returnregisteredEnquiryProvider_When_requestedTypeIsRegisteredEnquiry() {
     this.conversationListProviderRegistry.initializeConversationSuppliers();
 
@@ -74,14 +67,10 @@ class ConversationListProviderRegistryTest {
     assertThat(resultProvider.getClass(), is(RegisteredEnquiryConversationListProvider.class));
   }
 
-  @Test
-  void findByConversationType_Should_throwNoSuchElementException_When_requestedTypeIsNull() {
-    assertThrows(
-        NoSuchElementException.class,
-        () -> {
-          this.conversationListProviderRegistry.initializeConversationSuppliers();
+  @Test(expected = NoSuchElementException.class)
+  public void findByConversationType_Should_throwNoSuchElementException_When_requestedTypeIsNull() {
+    this.conversationListProviderRegistry.initializeConversationSuppliers();
 
-          this.conversationListProviderRegistry.findByConversationType(null);
-        });
+    this.conversationListProviderRegistry.findByConversationType(null);
   }
 }

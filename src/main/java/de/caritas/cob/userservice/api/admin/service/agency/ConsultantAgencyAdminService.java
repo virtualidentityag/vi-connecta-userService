@@ -77,8 +77,7 @@ public class ConsultantAgencyAdminService {
   public void appendAgenciesForConsultants(Set<ConsultantDTO> consultants) {
     var consultantIds = consultants.stream().map(ConsultantDTO::getId).collect(Collectors.toSet());
 
-    var consultantAgencies =
-        consultantAgencyRepository.findByConsultantIdInAndDeleteDateIsNull(consultantIds);
+    var consultantAgencies = consultantAgencyRepository.findByConsultantIdIn(consultantIds);
 
     var agencyIds =
         consultantAgencies.stream().map(ConsultantAgency::getAgencyId).collect(Collectors.toSet());

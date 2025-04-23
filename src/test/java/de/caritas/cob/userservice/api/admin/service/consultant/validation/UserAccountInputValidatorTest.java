@@ -6,8 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hibernate.validator.internal.util.CollectionHelper.asSet;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -19,13 +18,13 @@ import de.caritas.cob.userservice.api.exception.keycloak.KeycloakException;
 import javax.validation.Path;
 import javax.validation.Validator;
 import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class UserAccountInputValidatorTest {
 
   @InjectMocks private UserAccountInputValidator userAccountInputValidator;
@@ -88,15 +87,11 @@ public class UserAccountInputValidatorTest {
     }
   }
 
-  @Test
+  @Test(expected = KeycloakException.class)
   public void validateKeycloakResponse_Should_throwKeycloakException_When_userIdIsNull() {
-    assertThrows(
-        KeycloakException.class,
-        () -> {
-          KeycloakCreateUserResponseDTO responseDTO = new KeycloakCreateUserResponseDTO();
+    KeycloakCreateUserResponseDTO responseDTO = new KeycloakCreateUserResponseDTO();
 
-          this.userAccountInputValidator.validateKeycloakResponse(responseDTO);
-        });
+    this.userAccountInputValidator.validateKeycloakResponse(responseDTO);
   }
 
   @Test

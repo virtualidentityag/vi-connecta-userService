@@ -22,13 +22,13 @@ import de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class NewEnquiryEmailSupplierTest {
 
   private NewEnquiryEmailSupplier newEnquiryEmailSupplier;
@@ -41,7 +41,7 @@ public class NewEnquiryEmailSupplierTest {
 
   @Mock private ReleaseToggleService releaseToggleService;
 
-  @BeforeEach
+  @Before
   public void setup() {
     this.newEnquiryEmailSupplier =
         new NewEnquiryEmailSupplier(

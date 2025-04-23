@@ -30,7 +30,13 @@ import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -94,17 +100,15 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -115,9 +119,8 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
-class RocketChatServiceTest {
+@RunWith(MockitoJUnitRunner.class)
+public class RocketChatServiceTest {
 
   private final String MESSAGE = "Lorem Ipsum";
   private final String GROUP_ID = "xxxYYY";
@@ -192,8 +195,8 @@ class RocketChatServiceTest {
 
   @Mock private FindIterable<Document> findIterable;
 
-  @BeforeEach
-  void setup() {
+  @Before
+  public void setup() {
     rocketChatConfig.setBaseUrl("http://localhost/api/v1");
     setField(rocketChatService, "rocketChatConfig", rocketChatConfig);
 
@@ -202,7 +205,7 @@ class RocketChatServiceTest {
 
   /** Method: createPrivateGroup */
   @Test
-  void createPrivateGroup_Should_ReturnTheGroupId_WhenRocketChatApiCallWasSuccessfully()
+  public void createPrivateGroup_Should_ReturnTheGroupId_WhenRocketChatApiCallWasSuccessfully()
       throws SecurityException, RocketChatCreateGroupException {
 
     when(restTemplate.postForObject(
@@ -217,7 +220,7 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void
+  public void
       createPrivateGroup_Should_ThrowRocketChatCreateGroupException_WhenApiCallFailsWithAnException()
           throws SecurityException {
 
@@ -231,13 +234,13 @@ class RocketChatServiceTest {
       rocketChatService.createPrivateGroup(GROUP_NAME, RC_CREDENTIALS);
       fail("Expected exception: RocketChatCreateGroupException");
     } catch (RocketChatCreateGroupException rocketChatCreateGroupException) {
-      assertTrue(true, "Excepted RocketChatCreateGroupException thrown");
+      assertTrue("Excepted RocketChatCreateGroupException thrown", true);
     }
   }
 
   /** Method: deleteGroup */
   @Test
-  void deleteGroup_Should_ReturnTrue_WhenApiCallIsSuccessful() throws SecurityException {
+  public void deleteGroup_Should_ReturnTrue_WhenApiCallIsSuccessful() throws SecurityException {
 
     GroupDeleteResponseDTO response = new GroupDeleteResponseDTO(true);
 
@@ -253,7 +256,8 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void deleteGroup_Should_ReturnFalseAndLog_WhenApiCallIsNotSuccessful() throws SecurityException {
+  public void deleteGroup_Should_ReturnFalseAndLog_WhenApiCallIsNotSuccessful()
+      throws SecurityException {
 
     GroupDeleteResponseDTO response = new GroupDeleteResponseDTO(false);
 
@@ -271,7 +275,7 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void rollbackGroup_Should_Log_WhenApiCallFailsWithAnException() throws SecurityException {
+  public void rollbackGroup_Should_Log_WhenApiCallFailsWithAnException() throws SecurityException {
 
     HttpServerErrorException httpServerErrorException =
         new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "HttpServerErrorException");
@@ -286,18 +290,18 @@ class RocketChatServiceTest {
 
   /** Method: addUserToGroup */
   @Test
-  void addUserToGroup_Should_ThrowRocketChatAddUserToGroupException_WheApiCallFails() {
+  public void addUserToGroup_Should_ThrowRocketChatAddUserToGroupException_WheApiCallFails() {
 
     try {
       rocketChatService.addUserToGroup(RC_USER_ID, GROUP_ID);
       fail("Expected exception: RocketChatAddUserToGroupException");
     } catch (RocketChatAddUserToGroupException rcAddToGroupEx) {
-      assertTrue(true, "Excepted RocketChatAddUserToGroupException thrown");
+      assertTrue("Excepted RocketChatAddUserToGroupException thrown", true);
     }
   }
 
   @Test
-  void addUserToGroup_Should_ThrowRocketChatLoginException_WhenResponseIsNotSuccessful()
+  public void addUserToGroup_Should_ThrowRocketChatLoginException_WhenResponseIsNotSuccessful()
       throws RocketChatUserNotInitializedException {
 
     GroupResponseDTO groupResponseDTO = new GroupResponseDTO(null, false, "error", "errorType");
@@ -312,13 +316,13 @@ class RocketChatServiceTest {
       rocketChatService.addUserToGroup(RC_USER_ID, GROUP_ID);
       fail("Expected exception: RocketChatAddUserToGroupException");
     } catch (RocketChatAddUserToGroupException rcAddToGroupEx) {
-      assertTrue(true, "Excepted RocketChatAddUserToGroupException thrown");
+      assertTrue("Excepted RocketChatAddUserToGroupException thrown", true);
     }
   }
 
   /** Method: removeUserFromGroup */
   @Test
-  void
+  public void
       removeUserFromGroup_Should_ThrowRocketChatRemoveUserFromGroupException_WhenAPICallIsNotSuccessful()
           throws RocketChatUserNotInitializedException {
 
@@ -334,12 +338,12 @@ class RocketChatServiceTest {
       rocketChatService.removeUserFromGroup(RC_USER_ID, GROUP_ID);
       fail("Expected exception: RocketChatRemoveUserFromGroupException");
     } catch (RocketChatRemoveUserFromGroupException ex) {
-      assertTrue(true, "Excepted RocketChatRemoveUserFromGroupException thrown");
+      assertTrue("Excepted RocketChatRemoveUserFromGroupException thrown", true);
     }
   }
 
   @Test
-  void
+  public void
       removeUserFromGroup_Should_ThrowRocketChatRemoveUserFromGroupException_WhenAPIResponseIsUnSuccessful()
           throws Exception {
 
@@ -353,13 +357,13 @@ class RocketChatServiceTest {
       rocketChatService.removeUserFromGroup(RC_USER_ID, GROUP_ID);
       fail("Expected exception: RocketChatRemoveUserFromGroupException");
     } catch (RocketChatRemoveUserFromGroupException ex) {
-      assertTrue(true, "Excepted RocketChatRemoveUserFromGroupException thrown");
+      assertTrue("Excepted RocketChatRemoveUserFromGroupException thrown", true);
     }
   }
 
   /** Method: createPrivateGroupWithSystemUser */
   @Test
-  void
+  public void
       createPrivateGroupWithSystemUser_Should_ReturnTheGroupId_When_RocketChatApiCallWasSuccessful()
           throws Exception {
 
@@ -378,7 +382,7 @@ class RocketChatServiceTest {
 
   /** Method: removeSystemMessages */
   @Test
-  void
+  public void
       removeSystemMessages_Should_ThrowRocketChatRemoveSystemMessagesException_WhenApiCallFailsWithAnException()
           throws RocketChatUserNotInitializedException {
 
@@ -397,12 +401,12 @@ class RocketChatServiceTest {
       rocketChatService.removeSystemMessages(GROUP_ID, DATETIME_OLDEST, DATETIME_LATEST);
       fail("Expected exception: RocketChatRemoveSystemMessagesException");
     } catch (RocketChatRemoveSystemMessagesException rocketChatRemoveSystemMessagesException) {
-      assertTrue(true, "Excepted RocketChatRemoveSystemMessagesException thrown");
+      assertTrue("Excepted RocketChatRemoveSystemMessagesException thrown", true);
     }
   }
 
   @Test
-  void
+  public void
       removeSystemMessages_Should_ThrowRocketChatRemoveSystemMessagesException_WhenDateFormatIsWrong()
           throws RocketChatUserNotInitializedException {
 
@@ -412,32 +416,30 @@ class RocketChatServiceTest {
       rocketChatService.removeSystemMessages(GROUP_ID, DATETIME_OLDEST, null);
       fail("Expected exception: RocketChatRemoveSystemMessagesException");
     } catch (RocketChatRemoveSystemMessagesException rocketChatRemoveSystemMessagesException) {
-      assertTrue(true, "Excepted RocketChatRemoveSystemMessagesException thrown");
+      assertTrue("Excepted RocketChatRemoveSystemMessagesException thrown", true);
     }
   }
 
-  @Test
-  void removeSystemMessages_Should_ReturnFalseAndLogError_WhenApiCallIsUnSuccessful()
+  @Test(expected = RocketChatRemoveSystemMessagesException.class)
+  public void removeSystemMessages_Should_ReturnFalseAndLogError_WhenApiCallIsUnSuccessful()
       throws Exception {
-    assertThrows(
-        RocketChatRemoveSystemMessagesException.class,
-        () -> {
-          when(restTemplate.postForObject(
-                  ArgumentMatchers.anyString(),
-                  any(),
-                  ArgumentMatchers.<Class<StandardResponseDTO>>any()))
-              .thenReturn(STANDARD_RESPONSE_DTO_ERROR);
 
-          when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate.postForObject(
+            ArgumentMatchers.anyString(),
+            any(),
+            ArgumentMatchers.<Class<StandardResponseDTO>>any()))
+        .thenReturn(STANDARD_RESPONSE_DTO_ERROR);
 
-          rocketChatService.removeSystemMessages(GROUP_ID, DATETIME_OLDEST, DATETIME_LATEST);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
-          verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
-        });
+    rocketChatService.removeSystemMessages(GROUP_ID, DATETIME_OLDEST, DATETIME_LATEST);
+
+    verify(logger, atLeastOnce()).error(anyString(), anyString(), anyString());
   }
 
   @Test
-  void removeSystemMessages_Should_NotThrowException_WhenApiCallIsSuccessful() throws Exception {
+  public void removeSystemMessages_Should_NotThrowException_WhenApiCallIsSuccessful()
+      throws Exception {
 
     when(restTemplate.postForObject(
             ArgumentMatchers.anyString(),
@@ -453,7 +455,7 @@ class RocketChatServiceTest {
 
   /** Method: getUserId */
   @Test
-  void getUserId_Should_LoginUser() throws RocketChatLoginException {
+  public void getUserId_Should_LoginUser() throws RocketChatLoginException {
 
     when(rcCredentialsHelper.loginUser(any(), any()))
         .thenReturn(new ResponseEntity<>(LOGIN_RESPONSE_DTO_TECH_USER, HttpStatus.OK));
@@ -470,7 +472,7 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void getUserId_Should_LogoutUser() throws RocketChatLoginException {
+  public void getUserId_Should_LogoutUser() throws RocketChatLoginException {
 
     when(rcCredentialsHelper.loginUser(any(), any()))
         .thenReturn(new ResponseEntity<>(LOGIN_RESPONSE_DTO_TECH_USER, HttpStatus.OK));
@@ -487,7 +489,7 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void getUserId_Should_ReturnCorrectUserId() throws RocketChatLoginException {
+  public void getUserId_Should_ReturnCorrectUserId() throws RocketChatLoginException {
 
     when(rcCredentialsHelper.loginUser(any(), any()))
         .thenReturn(new ResponseEntity<>(LOGIN_RESPONSE_DTO_TECH_USER, HttpStatus.OK));
@@ -505,7 +507,7 @@ class RocketChatServiceTest {
 
   /** Method: getSubscriptionsOfUser */
   @Test
-  void
+  public void
       getSubscriptionsOfUser_Should_ThrowInternalServerErrorException_When_APICallIsNotSuccessful() {
 
     when(restTemplate.exchange(
@@ -519,12 +521,12 @@ class RocketChatServiceTest {
       rocketChatService.getSubscriptionsOfUser(RC_CREDENTIALS);
       fail("Expected exception: InternalServerErrorException");
     } catch (InternalServerErrorException ex) {
-      assertTrue(true, "Excepted InternalServerErrorException thrown");
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
   @Test
-  void
+  public void
       getSubscriptionsOfUser_Should_ThrowInternalServerErrorException_When_APIResponseIsUnSuccessful() {
 
     when(restTemplate.exchange(
@@ -538,12 +540,12 @@ class RocketChatServiceTest {
       rocketChatService.getSubscriptionsOfUser(RC_CREDENTIALS);
       fail("Expected exception: InternalServerErrorException");
     } catch (InternalServerErrorException ex) {
-      assertTrue(true, "Excepted InternalServerErrorException thrown");
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
   @Test
-  void
+  public void
       getSubscriptionsOfUser_Should_ThrowUnauthorizedException_When_RocketChatReturnsUnauthorized() {
 
     when(restTemplate.exchange(
@@ -563,7 +565,8 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void getSubscriptionsOfUser_Should_ReturnListOfSubscriptionsUpdateDTO_When_APICallIsSuccessful() {
+  public void
+      getSubscriptionsOfUser_Should_ReturnListOfSubscriptionsUpdateDTO_When_APICallIsSuccessful() {
 
     when(restTemplate.exchange(
             ArgumentMatchers.anyString(),
@@ -579,7 +582,8 @@ class RocketChatServiceTest {
 
   /** Method: getRoomsOfUser */
   @Test
-  void getRoomsOfUser_Should_ThrowInternalServerErrorException_When_APICallIsNotSuccessful() {
+  public void
+      getRoomsOfUser_Should_ThrowInternalServerErrorException_When_APICallIsNotSuccessful() {
 
     Exception exception = new RuntimeException(MESSAGE);
 
@@ -591,12 +595,13 @@ class RocketChatServiceTest {
       rocketChatService.getRoomsOfUser(RC_CREDENTIALS);
       fail("Expected exception: InternalServerErrorException");
     } catch (InternalServerErrorException ex) {
-      assertTrue(true, "Excepted InternalServerErrorException thrown");
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
   @Test
-  void getRoomsOfUser_Should_ThrowInternalServerErrorException_When_APIResponseIsUnSuccessful() {
+  public void
+      getRoomsOfUser_Should_ThrowInternalServerErrorException_When_APIResponseIsUnSuccessful() {
 
     when(restTemplate.exchange(
             ArgumentMatchers.anyString(), any(), any(), ArgumentMatchers.<Class<RoomsGetDTO>>any()))
@@ -606,12 +611,12 @@ class RocketChatServiceTest {
       rocketChatService.getRoomsOfUser(RC_CREDENTIALS);
       fail("Expected exception: InternalServerErrorException");
     } catch (InternalServerErrorException ex) {
-      assertTrue(true, "Excepted InternalServerErrorException thrown");
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
   @Test
-  void getRoomsOfUser_Should_ReturnListOfRoomsUpdateDTO_WhenAPICallIsSuccessful() {
+  public void getRoomsOfUser_Should_ReturnListOfRoomsUpdateDTO_WhenAPICallIsSuccessful() {
 
     when(restTemplate.exchange(
             ArgumentMatchers.anyString(), any(), any(), ArgumentMatchers.<Class<RoomsGetDTO>>any()))
@@ -624,7 +629,7 @@ class RocketChatServiceTest {
 
   /** Method: removeAllStandardUsersFromGroup */
   @Test
-  void
+  public void
       removeAllStandardUsersFromGroup_Should_ThrowRocketChatGetGroupMembersException_WhenGroupListIsEmpty()
           throws Exception {
 
@@ -636,13 +641,14 @@ class RocketChatServiceTest {
       spy.removeAllStandardUsersFromGroup(GROUP_ID);
       fail("Expected exception: RocketChatGetGroupMembersException");
     } catch (RocketChatGetGroupMembersException rocketChatGetGroupMembersException) {
-      assertTrue(true, "Excepted RocketChatGetGroupMembersException thrown");
+      assertTrue("Excepted RocketChatGetGroupMembersException thrown", true);
     }
   }
 
   @Test
-  void removeAllStandardUsersFromGroup_Should_RemoveAllStandardUsersAndNotTechnicalOrSystemUser()
-      throws Exception {
+  public void
+      removeAllStandardUsersFromGroup_Should_RemoveAllStandardUsersAndNotTechnicalOrSystemUser()
+          throws Exception {
 
     RocketChatService spy = Mockito.spy(rocketChatService);
 
@@ -663,7 +669,8 @@ class RocketChatServiceTest {
 
   /** Method: removeAllMessages */
   @Test
-  void removeAllMessages_Should_NotThrowException_WhenRemoveMessagesSucceeded() throws Exception {
+  public void removeAllMessages_Should_NotThrowException_WhenRemoveMessagesSucceeded()
+      throws Exception {
 
     when(restTemplate.postForObject(
             ArgumentMatchers.anyString(),
@@ -676,28 +683,25 @@ class RocketChatServiceTest {
     assertDoesNotThrow(() -> rocketChatService.removeAllMessages(GROUP_ID));
   }
 
-  @Test
-  void
+  @Test(expected = RocketChatRemoveSystemMessagesException.class)
+  public void
       removeAllMessages_Should_ThrowRocketChatRemoveSystemMessagesException_WhenRemoveMessagesFails()
           throws Exception {
-    assertThrows(
-        RocketChatRemoveSystemMessagesException.class,
-        () -> {
-          when(restTemplate.postForObject(
-                  ArgumentMatchers.anyString(),
-                  any(),
-                  ArgumentMatchers.<Class<StandardResponseDTO>>any()))
-              .thenReturn(STANDARD_RESPONSE_DTO_ERROR);
 
-          when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate.postForObject(
+            ArgumentMatchers.anyString(),
+            any(),
+            ArgumentMatchers.<Class<StandardResponseDTO>>any()))
+        .thenReturn(STANDARD_RESPONSE_DTO_ERROR);
 
-          rocketChatService.removeAllMessages(GROUP_ID);
-        });
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+
+    rocketChatService.removeAllMessages(GROUP_ID);
   }
 
   /** Method: getStandardMembersOfGroup */
   @Test
-  void
+  public void
       getStandardMembersOfGroup_Should_ThrowRocketChatGetGroupMembersException_WhenAPICallIsNotSuccessful() {
 
     Exception exception = new RuntimeException(MESSAGE);
@@ -708,25 +712,26 @@ class RocketChatServiceTest {
       rocketChatService.getStandardMembersOfGroup(GROUP_ID);
       fail("Expected exception: RocketChatGetGroupMembersException");
     } catch (RocketChatGetGroupMembersException | RocketChatUserNotInitializedException ex) {
-      assertTrue(true, "Excepted RocketChatGetGroupMembersException thrown");
+      assertTrue("Excepted RocketChatGetGroupMembersException thrown", true);
     }
   }
 
   @Test
-  void
+  public void
       getStandardMembersOfGroup_Should_ThrowRocketChatGetGroupMembersException_WhenAPIResponseIsUnSuccessful()
           throws Exception {
     try {
       rocketChatService.getStandardMembersOfGroup(GROUP_ID);
       fail("Expected exception: RocketChatGetGroupMembersException");
     } catch (RocketChatGetGroupMembersException ex) {
-      assertTrue(true, "Excepted RocketChatGetGroupMembersException thrown");
+      assertTrue("Excepted RocketChatGetGroupMembersException thrown", true);
     }
   }
 
   @Test
-  void getStandardMembersOfGroup_Should_ReturnListFilteredOfGroupMemberDTO_WhenAPICallIsSuccessful()
-      throws Exception {
+  public void
+      getStandardMembersOfGroup_Should_ReturnListFilteredOfGroupMemberDTO_WhenAPICallIsSuccessful()
+          throws Exception {
 
     var doc1 = givenSubscription(RC_CREDENTIALS_SYSTEM_A.getRocketChatUserId(), "s");
     givenMongoResponseWith(doc1);
@@ -744,50 +749,40 @@ class RocketChatServiceTest {
   }
 
   /** Method: getUserInfo */
-  @Test
-  void getUserInfo_Should_ThrowInternalServerExceptionException_WhenAPICallFails()
+  @Test(expected = InternalServerErrorException.class)
+  public void getUserInfo_Should_ThrowInternalServerExceptionException_WhenAPICallFails()
       throws RocketChatUserNotInitializedException {
-    assertThrows(
-        InternalServerErrorException.class,
-        () -> {
-          Exception exception =
-              new RestClientResponseException(
-                  MESSAGE, HttpStatus.BAD_REQUEST.value(), ERROR, null, null, null);
 
-          when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
-          when(restTemplate.exchange(
-                  ArgumentMatchers.anyString(),
-                  any(),
-                  any(),
-                  ArgumentMatchers.<Class<UserInfoResponseDTO>>any(),
-                  anyString()))
-              .thenThrow(exception);
+    Exception exception =
+        new RestClientResponseException(
+            MESSAGE, HttpStatus.BAD_REQUEST.value(), ERROR, null, null, null);
 
-          rocketChatService.getUserInfo(RC_USER_ID);
-        });
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate.exchange(
+            ArgumentMatchers.anyString(),
+            any(),
+            any(),
+            ArgumentMatchers.<Class<UserInfoResponseDTO>>any(),
+            anyString()))
+        .thenThrow(exception);
+
+    rocketChatService.getUserInfo(RC_USER_ID);
+  }
+
+  @Test(expected = InternalServerErrorException.class)
+  public void getUserInfo_Should_ThrowInternalServerErrorException_WhenAPICallIsNotSuccessful()
+      throws RocketChatUserNotInitializedException {
+
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate.exchange(
+            anyString(), eq(HttpMethod.GET), any(), eq(UserInfoResponseDTO.class), anyString()))
+        .thenReturn(new ResponseEntity<>(USER_INFO_RESPONSE_DTO_FAILED, HttpStatus.OK));
+
+    rocketChatService.getUserInfo(RC_USER_ID);
   }
 
   @Test
-  void getUserInfo_Should_ThrowInternalServerErrorException_WhenAPICallIsNotSuccessful()
-      throws RocketChatUserNotInitializedException {
-    assertThrows(
-        InternalServerErrorException.class,
-        () -> {
-          when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
-          when(restTemplate.exchange(
-                  anyString(),
-                  eq(HttpMethod.GET),
-                  any(),
-                  eq(UserInfoResponseDTO.class),
-                  anyString()))
-              .thenReturn(new ResponseEntity<>(USER_INFO_RESPONSE_DTO_FAILED, HttpStatus.OK));
-
-          rocketChatService.getUserInfo(RC_USER_ID);
-        });
-  }
-
-  @Test
-  void getUserInfo_Should_ReturnUserInfoResponseDTOWithSameUserId_WhenAPICallIsSuccessful()
+  public void getUserInfo_Should_ReturnUserInfoResponseDTOWithSameUserId_WhenAPICallIsSuccessful()
       throws Exception {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
@@ -805,7 +800,8 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void updateUser_Should_performRocketChatUpdate() throws RocketChatUserNotInitializedException {
+  public void updateUser_Should_performRocketChatUpdate()
+      throws RocketChatUserNotInitializedException {
     UserUpdateRequestDTO userUpdateRequestDTO =
         new EasyRandom().nextObject(UserUpdateRequestDTO.class);
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
@@ -820,48 +816,34 @@ class RocketChatServiceTest {
             eq(RC_URL_CHAT_USER_UPDATE), eq(HttpMethod.POST), any(), eq(UserInfoResponseDTO.class));
   }
 
-  @Test
-  void updateUser_Should_throwInternalServerErrorException_When_rocketChatUpdateFails()
+  @Test(expected = InternalServerErrorException.class)
+  public void updateUser_Should_throwInternalServerErrorException_When_rocketChatUpdateFails()
       throws RocketChatUserNotInitializedException {
-    assertThrows(
-        InternalServerErrorException.class,
-        () -> {
-          UserUpdateRequestDTO userUpdateRequestDTO =
-              new EasyRandom().nextObject(UserUpdateRequestDTO.class);
-          when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
-          when(restTemplate.exchange(
-                  eq(RC_URL_CHAT_USER_UPDATE),
-                  eq(HttpMethod.POST),
-                  any(),
-                  eq(UserInfoResponseDTO.class)))
-              .thenReturn(new ResponseEntity<>(new UserInfoResponseDTO(), HttpStatus.OK));
+    UserUpdateRequestDTO userUpdateRequestDTO =
+        new EasyRandom().nextObject(UserUpdateRequestDTO.class);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate.exchange(
+            eq(RC_URL_CHAT_USER_UPDATE), eq(HttpMethod.POST), any(), eq(UserInfoResponseDTO.class)))
+        .thenReturn(new ResponseEntity<>(new UserInfoResponseDTO(), HttpStatus.OK));
 
-          this.rocketChatService.updateUser(userUpdateRequestDTO);
-        });
+    this.rocketChatService.updateUser(userUpdateRequestDTO);
+  }
+
+  @Test(expected = InternalServerErrorException.class)
+  public void updateUser_Should_throwInternalServerErrorException_When_rocketChatIsNotReachable()
+      throws RocketChatUserNotInitializedException {
+    UserUpdateRequestDTO userUpdateRequestDTO =
+        new EasyRandom().nextObject(UserUpdateRequestDTO.class);
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate.exchange(
+            eq(RC_URL_CHAT_USER_UPDATE), eq(HttpMethod.POST), any(), eq(UserInfoResponseDTO.class)))
+        .thenThrow(mock(RestClientResponseException.class));
+
+    this.rocketChatService.updateUser(userUpdateRequestDTO);
   }
 
   @Test
-  void updateUser_Should_throwInternalServerErrorException_When_rocketChatIsNotReachable()
-      throws RocketChatUserNotInitializedException {
-    assertThrows(
-        InternalServerErrorException.class,
-        () -> {
-          UserUpdateRequestDTO userUpdateRequestDTO =
-              new EasyRandom().nextObject(UserUpdateRequestDTO.class);
-          when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
-          when(restTemplate.exchange(
-                  eq(RC_URL_CHAT_USER_UPDATE),
-                  eq(HttpMethod.POST),
-                  any(),
-                  eq(UserInfoResponseDTO.class)))
-              .thenThrow(mock(RestClientResponseException.class));
-
-          this.rocketChatService.updateUser(userUpdateRequestDTO);
-        });
-  }
-
-  @Test
-  void deleteUser_Should_performRocketDeleteUser() throws Exception {
+  public void deleteUser_Should_performRocketDeleteUser() throws Exception {
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate.exchange(
             eq(RC_URL_CHAT_USER_DELETE), eq(HttpMethod.POST), any(), eq(UserInfoResponseDTO.class)))
@@ -875,7 +857,7 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void deleteUser_Should_performRocketDeleteUserOnAlreadyDeletedResponse() throws Exception {
+  public void deleteUser_Should_performRocketDeleteUserOnAlreadyDeletedResponse() throws Exception {
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     var response =
         new UserInfoResponseDTO(
@@ -894,26 +876,19 @@ class RocketChatServiceTest {
             eq(RC_URL_CHAT_USER_DELETE), eq(HttpMethod.POST), any(), eq(UserInfoResponseDTO.class));
   }
 
-  @Test
-  void deleteUser_Should_throwRocketChatDeleteUserException_When_responseIsNotSuccess()
+  @Test(expected = RocketChatDeleteUserException.class)
+  public void deleteUser_Should_throwRocketChatDeleteUserException_When_responseIsNotSuccess()
       throws Exception {
-    assertThrows(
-        RocketChatDeleteUserException.class,
-        () -> {
-          when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
-          when(restTemplate.exchange(
-                  eq(RC_URL_CHAT_USER_DELETE),
-                  eq(HttpMethod.POST),
-                  any(),
-                  eq(UserInfoResponseDTO.class)))
-              .thenReturn(new ResponseEntity<>(new UserInfoResponseDTO(), HttpStatus.OK));
+    when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
+    when(restTemplate.exchange(
+            eq(RC_URL_CHAT_USER_DELETE), eq(HttpMethod.POST), any(), eq(UserInfoResponseDTO.class)))
+        .thenReturn(new ResponseEntity<>(new UserInfoResponseDTO(), HttpStatus.OK));
 
-          this.rocketChatService.deleteUser("");
-        });
+    this.rocketChatService.deleteUser("");
   }
 
   @Test
-  void deleteGroupAsTechnicalUser_Should_performRocketDeleteUser() throws Exception {
+  public void deleteGroupAsTechnicalUser_Should_performRocketDeleteUser() throws Exception {
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate.postForObject(eq(RC_URL_GROUPS_DELETE), any(), any()))
         .thenReturn(new ResponseEntity<>(new GroupDeleteResponseDTO(true), HttpStatus.OK));
@@ -923,21 +898,17 @@ class RocketChatServiceTest {
     verify(this.restTemplate, times(1)).postForObject(eq(RC_URL_GROUPS_DELETE), any(), any());
   }
 
-  @Test
-  void
+  @Test(expected = RocketChatDeleteGroupException.class)
+  public void
       deleteGroupAsTechnicalUser_Should_throwRocketChatDeleteUserException_When_responseIsNotSuccess()
           throws Exception {
-    assertThrows(
-        RocketChatDeleteGroupException.class,
-        () -> {
-          when(rcCredentialsHelper.getTechnicalUser()).thenThrow(new RuntimeException());
+    when(rcCredentialsHelper.getTechnicalUser()).thenThrow(new RuntimeException());
 
-          this.rocketChatService.deleteGroupAsTechnicalUser("");
-        });
+    this.rocketChatService.deleteGroupAsTechnicalUser("");
   }
 
   @Test
-  void deleteGroupAsSystemUser_Should_performRocketDeleteUser() throws Exception {
+  public void deleteGroupAsSystemUser_Should_performRocketDeleteUser() throws Exception {
     when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
     when(restTemplate.postForObject(eq(RC_URL_GROUPS_DELETE), any(), any()))
         .thenReturn(new ResponseEntity<>(new GroupDeleteResponseDTO(true), HttpStatus.OK));
@@ -947,22 +918,19 @@ class RocketChatServiceTest {
     verify(this.restTemplate, times(1)).postForObject(eq(RC_URL_GROUPS_DELETE), any(), any());
   }
 
-  @Test
-  void deleteGroupAsSystemUser_Should_throwInternalServerErrorException_When_responseIsNotSuccess()
-      throws Exception {
-    assertThrows(
-        InternalServerErrorException.class,
-        () -> {
-          when(rcCredentialsHelper.getSystemUser())
-              .thenThrow(new RocketChatUserNotInitializedException(""));
+  @Test(expected = InternalServerErrorException.class)
+  public void
+      deleteGroupAsSystemUser_Should_throwInternalServerErrorException_When_responseIsNotSuccess()
+          throws Exception {
+    when(rcCredentialsHelper.getSystemUser())
+        .thenThrow(new RocketChatUserNotInitializedException(""));
 
-          this.rocketChatService.deleteGroupAsSystemUser("");
-        });
+    this.rocketChatService.deleteGroupAsSystemUser("");
   }
 
   @Test
   @SuppressWarnings("unchecked")
-  void setRoomReadOnly_Should_performRocketChatSetRoomReadOnly() throws Exception {
+  public void setRoomReadOnly_Should_performRocketChatSetRoomReadOnly() throws Exception {
     when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
     when(restTemplate.exchange(
             eq(RC_URL_GROUPS_SET_READ_ONLY),
@@ -988,7 +956,7 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void setRoomReadOnly_Should_logError_When_responseIsNotSuccess() throws Exception {
+  public void setRoomReadOnly_Should_logError_When_responseIsNotSuccess() throws Exception {
     when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
     GroupResponseDTO groupResponseDTO = new GroupResponseDTO();
     groupResponseDTO.setSuccess(false);
@@ -1006,7 +974,7 @@ class RocketChatServiceTest {
 
   @Test
   @SuppressWarnings("unchecked")
-  void setRoomWriteable_Should_performRocketChatSetRoomReadOnly() throws Exception {
+  public void setRoomWriteable_Should_performRocketChatSetRoomReadOnly() throws Exception {
     when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
     when(restTemplate.exchange(
             eq(RC_URL_GROUPS_SET_READ_ONLY),
@@ -1032,7 +1000,7 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void setRoomWriteable_Should_logError_When_responseIsNotSuccess() throws Exception {
+  public void setRoomWriteable_Should_logError_When_responseIsNotSuccess() throws Exception {
     when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
     GroupResponseDTO groupResponseDTO = new GroupResponseDTO();
     groupResponseDTO.setSuccess(false);
@@ -1049,8 +1017,9 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void fetchAllInactivePrivateGroupsSinceGivenDate_ShouldThrowException_WhenRocketChatCallFails()
-      throws RocketChatUserNotInitializedException {
+  public void
+      fetchAllInactivePrivateGroupsSinceGivenDate_ShouldThrowException_WhenRocketChatCallFails()
+          throws RocketChatUserNotInitializedException {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     HttpServerErrorException httpServerErrorException =
@@ -1067,13 +1036,13 @@ class RocketChatServiceTest {
       this.rocketChatService.fetchAllInactivePrivateGroupsSinceGivenDate(LocalDateTime.now());
       fail("Expected exception: RocketChatGetGroupsListAllException");
     } catch (RocketChatGetGroupsListAllException ex) {
-      assertTrue(true, "Excepted RocketChatGetGroupsListAllException thrown");
+      assertTrue("Excepted RocketChatGetGroupsListAllException thrown", true);
       assertEquals("Could not get all rocket chat groups", ex.getMessage());
     }
   }
 
   @Test
-  void
+  public void
       fetchAllInactivePrivateGroupsSinceGivenDate_Should_ThrowException_WhenHttpStatusFromRocketChatCallIsNotOk()
           throws RocketChatUserNotInitializedException {
 
@@ -1091,13 +1060,13 @@ class RocketChatServiceTest {
       this.rocketChatService.fetchAllInactivePrivateGroupsSinceGivenDate(LocalDateTime.now());
       fail("Expected exception: RocketChatGetGroupsListAllException");
     } catch (RocketChatGetGroupsListAllException ex) {
-      assertTrue(true, "Excepted RocketChatGetGroupsListAllException thrown");
+      assertTrue("Excepted RocketChatGetGroupsListAllException thrown", true);
       assertEquals("Could not get all rocket chat groups", ex.getMessage());
     }
   }
 
   @Test
-  void fetchAllInactivePrivateGroupsSinceGivenDate_Should_ReturnCorrectGroupDtoList()
+  public void fetchAllInactivePrivateGroupsSinceGivenDate_Should_ReturnCorrectGroupDtoList()
       throws RocketChatUserNotInitializedException, RocketChatGetGroupsListAllException {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
@@ -1118,7 +1087,7 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void fetchAllInactivePrivateGroupsSinceGivenDate_Should_UseCorrectMongoQuery()
+  public void fetchAllInactivePrivateGroupsSinceGivenDate_Should_UseCorrectMongoQuery()
       throws RocketChatUserNotInitializedException, RocketChatGetGroupsListAllException {
 
     LocalDateTime dateToCheck = LocalDateTime.of(2021, 1, 1, 0, 0, 0);
@@ -1147,7 +1116,7 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void
+  public void
       fetchAllInactivePrivateGroupsSinceGivenDate_Should_CallRocketChatApiMultipleTimes_When_ResultIsPaginated()
           throws RocketChatUserNotInitializedException, RocketChatGetGroupsListAllException {
 
@@ -1177,7 +1146,7 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void
+  public void
       fetchAllInactivePrivateGroupsSinceGivenDate_Should_CallRocketChatApiOnlyOnce_When_ResponseContainsTotalOfZeroElements()
           throws RocketChatUserNotInitializedException, RocketChatGetGroupsListAllException {
 
@@ -1209,7 +1178,7 @@ class RocketChatServiceTest {
   }
 
   @Test
-  void getRocketChatUserIdByUsername_Should_ThrowException_WhenRocketChatCallFails()
+  public void getRocketChatUserIdByUsername_Should_ThrowException_WhenRocketChatCallFails()
       throws RocketChatUserNotInitializedException {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
@@ -1228,13 +1197,13 @@ class RocketChatServiceTest {
       this.rocketChatService.getRocketChatUserIdByUsername(USERNAME);
       fail("Expected exception: RocketChatGetUserIdException");
     } catch (RocketChatGetUserIdException ex) {
-      assertTrue(true, "Excepted RocketChatGetUserIdException thrown");
+      assertTrue("Excepted RocketChatGetUserIdException thrown", true);
       assertEquals("Could not get users list from Rocket.Chat", ex.getMessage());
     }
   }
 
   @Test
-  void getRocketChatUserIdByUsername_Should_ThrowException_WhenFoundNoUserByUsername()
+  public void getRocketChatUserIdByUsername_Should_ThrowException_WhenFoundNoUserByUsername()
       throws RocketChatUserNotInitializedException {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
@@ -1251,13 +1220,13 @@ class RocketChatServiceTest {
       this.rocketChatService.getRocketChatUserIdByUsername(USERNAME);
       fail("Expected exception: RocketChatGetUserIdException");
     } catch (RocketChatGetUserIdException ex) {
-      assertTrue(true, "Excepted RocketChatGetUserIdException thrown");
+      assertTrue("Excepted RocketChatGetUserIdException thrown", true);
       assertEquals("Found 0 users by username", ex.getMessage());
     }
   }
 
   @Test
-  void getRocketChatUserIdByUsername_Should_ThrowException_WhenFound2UsersByUsername()
+  public void getRocketChatUserIdByUsername_Should_ThrowException_WhenFound2UsersByUsername()
       throws RocketChatUserNotInitializedException {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
@@ -1274,14 +1243,15 @@ class RocketChatServiceTest {
       this.rocketChatService.getRocketChatUserIdByUsername(USERNAME);
       fail("Expected exception: RocketChatGetUserIdException");
     } catch (RocketChatGetUserIdException ex) {
-      assertTrue(true, "Excepted RocketChatGetUserIdException thrown");
+      assertTrue("Excepted RocketChatGetUserIdException thrown", true);
       assertEquals("Found 2 users by username", ex.getMessage());
     }
   }
 
   @Test
-  void getRocketChatUserIdByUsername_Should_ThrowException_WhenHttpStatusFromRocketChatCallIsNotOk()
-      throws RocketChatUserNotInitializedException {
+  public void
+      getRocketChatUserIdByUsername_Should_ThrowException_WhenHttpStatusFromRocketChatCallIsNotOk()
+          throws RocketChatUserNotInitializedException {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate.exchange(
@@ -1297,13 +1267,13 @@ class RocketChatServiceTest {
       this.rocketChatService.getRocketChatUserIdByUsername(USERNAME);
       fail("Expected exception: RocketChatGetUserIdException");
     } catch (RocketChatGetUserIdException ex) {
-      assertTrue(true, "Excepted RocketChatGetUserIdException thrown");
+      assertTrue("Excepted RocketChatGetUserIdException thrown", true);
       assertEquals("Could not get users list from Rocket.Chat", ex.getMessage());
     }
   }
 
   @Test
-  void getRocketChatUserIdByUsername_Should_ReturnRocketChatUserId()
+  public void getRocketChatUserIdByUsername_Should_ReturnRocketChatUserId()
       throws RocketChatUserNotInitializedException, RocketChatGetUserIdException {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);

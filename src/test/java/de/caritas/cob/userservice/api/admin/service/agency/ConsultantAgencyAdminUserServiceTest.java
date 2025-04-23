@@ -6,7 +6,8 @@ import static java.util.Objects.requireNonNull;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.times;
@@ -14,7 +15,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.AgencyDTO;
-import de.caritas.cob.userservice.api.adapters.web.dto.ConsultantDTO;
 import de.caritas.cob.userservice.api.exception.httpresponses.CustomValidationHttpStatusException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.model.Consultant;
@@ -26,16 +26,15 @@ import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ConsultantAgencyAdminUserServiceTest {
 
   @InjectMocks private ConsultantAgencyAdminService consultantAgencyAdminService;
@@ -117,36 +116,21 @@ public class ConsultantAgencyAdminUserServiceTest {
     verify(this.consultantRepository, times(10)).save(any());
   }
 
-  @Test
+  @Test(expected = InternalServerErrorException.class)
   public void
       removeConsultantsFromTeamSessionsByAgencyId_Should_throwInternalServerErrorException_When_agencyServiceFails() {
-    assertThrows(
-        InternalServerErrorException.class,
-        () -> {
-          Session session = new EasyRandom().nextObject(Session.class);
-          session.setTeamSession(true);
-          List<Consultant> consultants =
-              new EasyRandom().objects(Consultant.class, 10).collect(Collectors.toList());
+    Session session = new EasyRandom().nextObject(Session.class);
+    session.setTeamSession(true);
+    List<Consultant> consultants =
+        new EasyRandom().objects(Consultant.class, 10).collect(Collectors.toList());
 
-          when(this.sessionRepository.findByAgencyIdAndStatusAndTeamSessionIsTrue(any(), any()))
-              .thenReturn(singletonList(session));
-          when(this.consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(
-                  anyList()))
-              .thenReturn(consultants);
-          when(this.agencyService.getAgency(any())).thenThrow(new InternalServerErrorException(""));
+    when(this.sessionRepository.findByAgencyIdAndStatusAndTeamSessionIsTrue(any(), any()))
+        .thenReturn(singletonList(session));
+    when(this.consultantRepository.findByConsultantAgenciesAgencyIdInAndDeleteDateIsNull(anyList()))
+        .thenReturn(consultants);
+    when(this.agencyService.getAgency(any())).thenThrow(new InternalServerErrorException(""));
 
-          this.consultantAgencyAdminService.removeConsultantsFromTeamSessionsByAgencyId(1L);
-        });
-  }
-
-  @Test
-  void appendAgenciesForConsultants_Should_callConsultantAgencyRepositoryForNotDeletedEntries() {
-    ConsultantDTO consultantDTO = new EasyRandom().nextObject(ConsultantDTO.class);
-
-    this.consultantAgencyAdminService.appendAgenciesForConsultants(Set.of(consultantDTO));
-
-    verify(consultantAgencyRepository).findByConsultantIdInAndDeleteDateIsNull(any());
-    verify(agencyAdminService).retrieveAllAgencies();
+    this.consultantAgencyAdminService.removeConsultantsFromTeamSessionsByAgencyId(1L);
   }
 
   @Test

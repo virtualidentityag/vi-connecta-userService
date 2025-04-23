@@ -75,7 +75,6 @@ public class ConsultantAdminFilterServiceBase {
     ConsultantSearchResultDTO firstPage =
         this.consultantAdminFilterService.findFilteredConsultants(
             1, 30, new ConsultantFilter(), null);
-
     ConsultantSearchResultDTO secondPage =
         this.consultantAdminFilterService.findFilteredConsultants(
             2, 30, new ConsultantFilter(), null);

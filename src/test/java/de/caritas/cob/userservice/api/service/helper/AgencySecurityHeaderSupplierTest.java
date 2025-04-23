@@ -5,7 +5,7 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID_LIST;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -21,22 +21,19 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.context.request.RequestContextHolder;
 
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
-class AgencySecurityHeaderSupplierTest {
+@RunWith(MockitoJUnitRunner.class)
+public class AgencySecurityHeaderSupplierTest {
 
   private final String GET_AGENCY_METHOD_NAME = "getAgency";
   private final String GET_AGENCIES_METHOD_NAME = "getAgencies";
@@ -55,8 +52,8 @@ class AgencySecurityHeaderSupplierTest {
 
   @Mock private AgencyServiceApiControllerFactory agencyServiceApiControllerFactory;
 
-  @BeforeEach
-  void setup() throws NoSuchFieldException, SecurityException {
+  @Before
+  public void setup() throws NoSuchFieldException, SecurityException {
     when(agencyServiceApiControllerFactory.createControllerApi()).thenReturn(agencyControllerApi);
     this.agencyResponseDTOS =
         AGENCY_DTO_LIST.stream().map(this::toAgencyResponseDTO).collect(Collectors.toList());
@@ -75,7 +72,7 @@ class AgencySecurityHeaderSupplierTest {
   }
 
   @Test
-  void getAgencies_Should_ReturnAgencyDTOList_When_ProvidedWithValidAgencyIds() {
+  public void getAgencies_Should_ReturnAgencyDTOList_When_ProvidedWithValidAgencyIds() {
     when(agencyControllerApi.getAgenciesByIds(ArgumentMatchers.any()))
         .thenReturn(this.agencyResponseDTOS);
 
@@ -85,8 +82,9 @@ class AgencySecurityHeaderSupplierTest {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Test
-  void test_Should_Fail_When_MethodgetAgenciesFromAgencyServiceDoesNotHaveCacheableAnnotation()
-      throws NoSuchMethodException, SecurityException {
+  public void
+      test_Should_Fail_When_MethodgetAgenciesFromAgencyServiceDoesNotHaveCacheableAnnotation()
+          throws NoSuchMethodException, SecurityException {
 
     AgencyService agencyService =
         new AgencyService(
@@ -102,7 +100,7 @@ class AgencySecurityHeaderSupplierTest {
   }
 
   @Test
-  void getAgency_Should_ReturnAgencyDTO_When_ProvidedWithValidAgencyId() {
+  public void getAgency_Should_ReturnAgencyDTO_When_ProvidedWithValidAgencyId() {
 
     when(agencyControllerApi.getAgenciesByIds(ArgumentMatchers.any()))
         .thenReturn(this.agencyResponseDTOS);
@@ -113,7 +111,7 @@ class AgencySecurityHeaderSupplierTest {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Test
-  void test_Should_Fail_When_MethodgetAgencyFromAgencyServiceDoesNotHaveCacheableAnnotation()
+  public void test_Should_Fail_When_MethodgetAgencyFromAgencyServiceDoesNotHaveCacheableAnnotation()
       throws NoSuchMethodException, SecurityException {
 
     AgencyService agencyService =
@@ -130,7 +128,7 @@ class AgencySecurityHeaderSupplierTest {
   }
 
   @Test
-  void getAgencyWithoutCaching_Should_ReturnAgencyDTO_WhenProvidedWithValidAgencyId() {
+  public void getAgencyWithoutCaching_Should_ReturnAgencyDTO_WhenProvidedWithValidAgencyId() {
     when(agencyControllerApi.getAgenciesByIds(ArgumentMatchers.any()))
         .thenReturn(this.agencyResponseDTOS);
 

@@ -18,17 +18,14 @@ import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
-class RelevantUserAccountIdsByChatProviderTest {
+@RunWith(MockitoJUnitRunner.class)
+public class RelevantUserAccountIdsByChatProviderTest {
 
   private static final EasyRandom easyRandom = new EasyRandom();
 
@@ -41,7 +38,7 @@ class RelevantUserAccountIdsByChatProviderTest {
   @Mock private ConsultantService consultantService;
 
   @Test
-  void collectUserIds_Should_returnAllMergedDependingIds_When_rcGroupHasMembers() {
+  public void collectUserIds_Should_returnAllMergedDependingIds_When_rcGroupHasMembers() {
     List<GroupMemberDTO> groupMembers =
         asList(memberDTOWithRcId("rc1"), memberDTOWithRcId("rc2"), memberDTOWithRcId("rc3"));
     when(this.rocketChatService.getChatUsers(any())).thenReturn(groupMembers);
@@ -84,7 +81,7 @@ class RelevantUserAccountIdsByChatProviderTest {
   }
 
   @Test
-  void
+  public void
       collectUserIds_Should_returnAllMergedDependingIdsInsteadOfNotAvailableUser_When_rcGroupHasMembers() {
     List<GroupMemberDTO> groupMembers =
         asList(memberDTOWithRcId("rc1"), memberDTOWithRcId("rc2"), memberDTOWithRcId("rc3"));

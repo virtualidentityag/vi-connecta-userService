@@ -4,7 +4,6 @@ import static de.caritas.cob.userservice.api.config.auth.UserRole.CONSULTANT;
 import static de.caritas.cob.userservice.api.config.auth.UserRole.GROUP_CHAT_CONSULTANT;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -30,8 +29,9 @@ import de.caritas.cob.userservice.api.tenant.TenantData;
 import de.caritas.cob.userservice.tenantadminservice.generated.web.model.Licensing;
 import de.caritas.cob.userservice.tenantadminservice.generated.web.model.TenantDTO;
 import org.jeasy.random.EasyRandom;
+import org.junit.Test;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -39,9 +39,11 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
+@RunWith(SpringRunner.class)
 @SpringBootTest(classes = UserServiceApplication.class)
 @TestPropertySource(properties = "spring.profiles.active=testing")
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -71,21 +73,16 @@ public class CreateConsultantSagaTenantAwareIT {
     TenantContext.clear();
   }
 
-  @Test
+  @Test(expected = CustomValidationHttpStatusException.class)
   public void
       createNewConsultant_Should_throwCustomValidationHttpStatusException_When_LicensesAreExceeded() {
-    assertThrows(
-        CustomValidationHttpStatusException.class,
-        () -> {
-          // given
-          givenTenantApiCall();
-          createConsultant("username1");
-          createConsultant("username2");
-          CreateConsultantDTO createConsultantDTO =
-              this.easyRandom.nextObject(CreateConsultantDTO.class);
-          this.createConsultantSaga.createNewConsultant(createConsultantDTO);
-          rollbackDBState();
-        });
+    // given
+    givenTenantApiCall();
+    createConsultant("username1");
+    createConsultant("username2");
+    CreateConsultantDTO createConsultantDTO = this.easyRandom.nextObject(CreateConsultantDTO.class);
+    this.createConsultantSaga.createNewConsultant(createConsultantDTO);
+    rollbackDBState();
   }
 
   @Test

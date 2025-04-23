@@ -7,7 +7,9 @@ import static org.hamcrest.CoreMatchers.everyItem;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -29,16 +31,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit4.SpringRunner;
 
-@ExtendWith(SpringExtension.class)
+@RunWith(SpringRunner.class)
 public class ConsultantAgencyServiceTest {
 
   private final String CONSULTANT_ID = "1b71cc46-650d-42bb-8299-f8e3f6d7249a";
@@ -103,7 +105,7 @@ public class ConsultantAgencyServiceTest {
   @SuppressWarnings("unused")
   private UserDtoMapper userDtoMapper;
 
-  @BeforeEach
+  @Before
   public void setup() {
     setInternalState(LogService.class, "LOGGER", logger);
   }
@@ -140,7 +142,7 @@ public class ConsultantAgencyServiceTest {
       consultantAgencyService.getConsultantsOfAgency(AGENCY_ID);
       fail("Expected exception: InternalServerErrorException");
     } catch (InternalServerErrorException serviceException) {
-      assertTrue(true, "Excepted InternalServerErrorException thrown");
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 
@@ -156,7 +158,7 @@ public class ConsultantAgencyServiceTest {
       consultantAgencyService.getConsultantsOfAgency(AGENCY_ID);
       fail("Expected exception: InternalServerErrorException");
     } catch (InternalServerErrorException serviceException) {
-      assertTrue(true, "Excepted InternalServerErrorException thrown");
+      assertTrue("Excepted InternalServerErrorException thrown", true);
     }
   }
 

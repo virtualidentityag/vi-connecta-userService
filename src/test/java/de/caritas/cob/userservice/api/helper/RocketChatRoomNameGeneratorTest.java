@@ -4,19 +4,19 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.ACTIVE_CHA
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertTrue;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class RocketChatRoomNameGeneratorTest {
 
   private RocketChatRoomNameGenerator rocketChatRoomNameGenerator;
 
-  @BeforeEach
+  @Before
   public void setup() {
     this.rocketChatRoomNameGenerator = new RocketChatRoomNameGenerator();
   }

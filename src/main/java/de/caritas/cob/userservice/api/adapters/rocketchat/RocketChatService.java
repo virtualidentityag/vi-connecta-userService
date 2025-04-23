@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.adapters.rocketchat;
 
-import static com.mongodb.client.model.Filters.eq;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static java.util.Arrays.asList;
 import static java.util.Objects.isNull;
@@ -8,7 +7,10 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ArrayUtils.isNotEmpty;
 
 import com.google.common.collect.Lists;
+import com.mongodb.DBObject;
+import com.mongodb.QueryBuilder;
 import com.mongodb.client.MongoClient;
+import com.mongodb.client.model.Filters;
 import de.caritas.cob.userservice.api.adapters.rocketchat.config.RocketChatConfig;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.StandardResponseDTO;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupAddUserBodyDTO;
@@ -487,18 +489,15 @@ public class RocketChatService implements MessageClient {
       response = this.rcCredentialHelper.loginUser(username, password);
     }
 
-    LoginResponseDTO body = response.getBody();
-    if (body != null) {
-      var rocketChatCredentialsLocal =
-          RocketChatCredentials.builder()
-              .rocketChatUserId(body.getData().getUserId())
-              .rocketChatToken(body.getData().getAuthToken())
-              .build();
-      logoutUser(rocketChatCredentialsLocal);
-      return rocketChatCredentialsLocal.getRocketChatUserId();
-    } else {
-      throw new RocketChatLoginException("Could not login user in Rocket.Chat");
-    }
+    var rocketChatCredentialsLocal =
+        RocketChatCredentials.builder()
+            .rocketChatUserId(response.getBody().getData().getUserId())
+            .rocketChatToken(response.getBody().getData().getAuthToken())
+            .build();
+
+    logoutUser(rocketChatCredentialsLocal);
+
+    return rocketChatCredentialsLocal.getRocketChatUserId();
   }
 
   /**
@@ -779,7 +778,7 @@ public class RocketChatService implements MessageClient {
         mongoClient
             .getDatabase(MONGO_DATABASE_NAME)
             .getCollection(MONGO_COLLECTION_SUBSCRIPTION)
-            .find(eq("rid", chatId));
+            .find(Filters.eq("rid", chatId));
 
     var members = new ArrayList<GroupMemberDTO>();
     try (var cursor = subscriptions.iterator()) {
@@ -804,6 +803,7 @@ public class RocketChatService implements MessageClient {
    * @return al members of the group
    * @deprecated use getChatUsers
    */
+  @Deprecated
   public List<GroupMemberDTO> getMembersOfGroup(String rcGroupId)
       throws RocketChatGetGroupMembersException {
 
@@ -1176,21 +1176,35 @@ public class RocketChatService implements MessageClient {
   public List<GroupDTO> fetchAllInactivePrivateGroupsSinceGivenDate(
       LocalDateTime dateTimeSinceInactive) throws RocketChatGetGroupsListAllException {
 
-    String filter =
-        String.format(
-            "{\"lm\": {\"$lt\": {\"$date\": \"%s\"}}, \"$and\": [{\"t\": \"p\"}]}",
-            dateTimeSinceInactive.format(DateTimeFormatter.ofPattern(RC_DATE_TIME_PATTERN)));
-    return getGroupsListAll(filter);
+    final var GROUP_RESPONSE_LAST_MESSAGE_TIMESTAMP_FIELD = "lm";
+    final var GROUP_RESPONSE_GROUP_TYPE_FIELD = "t";
+    final var GROUP_RESPONSE_GROUP_TYPE_PRIVATE = "p";
+
+    DBObject mongoDbQuery =
+        QueryBuilder.start(GROUP_RESPONSE_LAST_MESSAGE_TIMESTAMP_FIELD)
+            .lessThan(
+                QueryBuilder.start("$date")
+                    .is(
+                        dateTimeSinceInactive.format(
+                            DateTimeFormatter.ofPattern(RC_DATE_TIME_PATTERN)))
+                    .get())
+            .and(
+                QueryBuilder.start(GROUP_RESPONSE_GROUP_TYPE_FIELD)
+                    .is(GROUP_RESPONSE_GROUP_TYPE_PRIVATE)
+                    .get())
+            .get();
+
+    return getGroupsListAll(mongoDbQuery);
   }
 
   /**
    * Returns a list of all Rocket.Chat groups.
    *
-   * @param mongoDbQuery mongoDB Query as {@link String}
+   * @param mongoDbQuery mongoDB Query as {@link DBObject} created with {@link QueryBuilder}
    * @return a {@link List} of {@link GroupDTO} instances
    * @throws RocketChatGetGroupsListAllException when request fails
    */
-  private List<GroupDTO> getGroupsListAll(String mongoDbQuery)
+  private List<GroupDTO> getGroupsListAll(DBObject mongoDbQuery)
       throws RocketChatGetGroupsListAllException {
 
     try {
@@ -1206,7 +1220,7 @@ public class RocketChatService implements MessageClient {
   }
 
   private List<GroupDTO> getGroupListAllCombiningPages(
-      String mongoDbQuery, HttpEntity<GroupAddUserBodyDTO> request)
+      DBObject mongoDbQuery, HttpEntity<GroupAddUserBodyDTO> request)
       throws RocketChatGetGroupsListAllException {
     List<GroupDTO> result = Lists.newArrayList();
     int currentOffset = 0;
@@ -1244,12 +1258,12 @@ public class RocketChatService implements MessageClient {
 
   private ResponseEntity<GroupsListAllResponseDTO>
       getGroupsListAllResponseDTOResponseEntityForCurrentOffset(
-          String mongoDbQuery, HttpEntity<GroupAddUserBodyDTO> request, int currentOffset) {
+          DBObject mongoDbQuery, HttpEntity<GroupAddUserBodyDTO> request, int currentOffset) {
     ResponseEntity<GroupsListAllResponseDTO> response;
     var url = getGroupAllPaginatedUrl(currentOffset);
     response =
         restTemplate.exchange(
-            url, HttpMethod.GET, request, GroupsListAllResponseDTO.class, mongoDbQuery);
+            url, HttpMethod.GET, request, GroupsListAllResponseDTO.class, mongoDbQuery.toString());
     return response;
   }
 

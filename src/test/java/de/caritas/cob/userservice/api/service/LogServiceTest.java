@@ -13,14 +13,14 @@ import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
 import java.io.PrintWriter;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class LogServiceTest {
 
   private final String ERROR_MESSAGE = "Error message";
@@ -29,7 +29,7 @@ public class LogServiceTest {
 
   @Mock private Logger logger;
 
-  @BeforeEach
+  @Before
   public void setup() {
     setInternalState(LogService.class, "LOGGER", logger);
   }

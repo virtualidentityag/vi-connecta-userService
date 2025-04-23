@@ -10,7 +10,7 @@ import de.caritas.cob.userservice.api.adapters.web.dto.SessionDTO;
 import de.caritas.cob.userservice.api.model.Session;
 import java.time.LocalDateTime;
 import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class SessionMapperTest {
 

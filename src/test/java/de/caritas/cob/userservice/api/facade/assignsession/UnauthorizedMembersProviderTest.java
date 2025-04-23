@@ -13,8 +13,7 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
@@ -30,18 +29,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
-class UnauthorizedMembersProviderTest {
+@RunWith(MockitoJUnitRunner.class)
+public class UnauthorizedMembersProviderTest {
 
   @InjectMocks UnauthorizedMembersProvider unauthorizedMembersProvider;
 
@@ -63,8 +59,8 @@ class UnauthorizedMembersProviderTest {
   RocketChatCredentials techUserRcCredentials = easyRandom.nextObject(RocketChatCredentials.class);
   List<GroupMemberDTO> initialMemberList;
 
-  @BeforeEach
-  void setup() throws NoSuchFieldException, SecurityException {
+  @Before
+  public void setup() throws NoSuchFieldException, SecurityException {
     setField(
         unauthorizedMembersProvider,
         FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID,
@@ -117,7 +113,7 @@ class UnauthorizedMembersProviderTest {
   }
 
   @Test
-  void obtainConsultantsToRemoveShouldNotIncludeConsultantToAssignIfNotAssignedAlready()
+  public void obtainConsultantsToRemoveShouldNotIncludeConsultantToAssignIfNotAssignedAlready()
       throws RocketChatUserNotInitializedException {
 
     var consultant = easyRandom.nextObject(Consultant.class);
@@ -135,7 +131,7 @@ class UnauthorizedMembersProviderTest {
   }
 
   @Test
-  void obtainConsultantsToRemoveShouldNotIncludeConsultantToAssignIfAlreadyAssigned()
+  public void obtainConsultantsToRemoveShouldNotIncludeConsultantToAssignIfAlreadyAssigned()
       throws RocketChatUserNotInitializedException {
 
     var consultant = easyRandom.nextObject(Consultant.class);
@@ -158,7 +154,7 @@ class UnauthorizedMembersProviderTest {
   }
 
   @Test
-  void obtainConsultantsToRemoveShouldNotIncludeConsultantToKeep()
+  public void obtainConsultantsToRemoveShouldNotIncludeConsultantToKeep()
       throws RocketChatUserNotInitializedException {
 
     var consultant = easyRandom.nextObject(Consultant.class);
@@ -190,7 +186,7 @@ class UnauthorizedMembersProviderTest {
   }
 
   @Test
-  void
+  public void
       obtainConsultantsToRemove_Should_ReturnCorrectUnauthorizedMemberList_When_SessionIsNoTeamSession()
           throws RocketChatUserNotInitializedException {
     newConsultant.setTeamConsultant(false);
@@ -214,7 +210,7 @@ class UnauthorizedMembersProviderTest {
   }
 
   @Test
-  void
+  public void
       obtainConsultantsToRemove_Should_ReturnCorrectUnauthorizedMemberList_When_SessionIsNormalTeamSession()
           throws RocketChatUserNotInitializedException {
     newConsultant.setTeamConsultant(true);
@@ -241,7 +237,7 @@ class UnauthorizedMembersProviderTest {
   }
 
   @Test
-  void
+  public void
       obtainConsultantsToRemove_Should_ReturnCorrectUnauthorizedMemberList_When_SessionIsFeedbackSessionForNormalGroup()
           throws RocketChatUserNotInitializedException {
     newConsultant.setTeamConsultant(true);
@@ -283,7 +279,7 @@ class UnauthorizedMembersProviderTest {
   }
 
   @Test
-  void
+  public void
       obtainConsultantsToRemove_Should_ReturnCorrectUnauthorizedMemberList_When_SessionIsFeedbackSessionForFeedbackGroup()
           throws RocketChatUserNotInitializedException {
     newConsultant.setTeamConsultant(true);
@@ -320,20 +316,14 @@ class UnauthorizedMembersProviderTest {
             normalConsultant, teamConsultant, teamConsultant2, peerConsultant, peerConsultant2));
   }
 
-  @Test
-  void obtainConsultantsToRemove_Should_ThrowInternalServerError_When_TechUserIsNotInitialized()
-      throws RocketChatUserNotInitializedException {
-    assertThrows(
-        InternalServerErrorException.class,
-        () -> {
-          when(rocketChatCredentialsProvider.getTechnicalUser())
-              .thenThrow(new RocketChatUserNotInitializedException(""));
+  @Test(expected = InternalServerErrorException.class)
+  public void
+      obtainConsultantsToRemove_Should_ThrowInternalServerError_When_TechUserIsNotInitialized()
+          throws RocketChatUserNotInitializedException {
+    when(rocketChatCredentialsProvider.getTechnicalUser())
+        .thenThrow(new RocketChatUserNotInitializedException(""));
 
-          unauthorizedMembersProvider.obtainConsultantsToRemove(
-              RC_GROUP_ID,
-              FEEDBACK_SESSION_WITH_ASKER_AND_CONSULTANT,
-              newConsultant,
-              initialMemberList);
-        });
+    unauthorizedMembersProvider.obtainConsultantsToRemove(
+        RC_GROUP_ID, FEEDBACK_SESSION_WITH_ASKER_AND_CONSULTANT, newConsultant, initialMemberList);
   }
 }

@@ -8,15 +8,15 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionFilter;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.PageRequest;
 
-@ExtendWith(MockitoExtension.class)
-class AgencySessionPageProviderTest {
+@RunWith(MockitoJUnitRunner.class)
+public class AgencySessionPageProviderTest {
 
   @InjectMocks private AgencySessionPageProvider agencySessionPageProvider;
 
@@ -25,7 +25,7 @@ class AgencySessionPageProviderTest {
   @Mock private SessionFilter sessionFilter;
 
   @Test
-  void supports_Should_returnTrue_When_agencyFilterIsSet() {
+  public void supports_Should_returnTrue_When_agencyFilterIsSet() {
     when(this.sessionFilter.getAgency()).thenReturn(1);
 
     boolean supports = this.agencySessionPageProvider.isSupported();
@@ -34,7 +34,7 @@ class AgencySessionPageProviderTest {
   }
 
   @Test
-  void supports_Should_returnFalse_When_agencyFilterIsNotSet() {
+  public void supports_Should_returnFalse_When_agencyFilterIsNotSet() {
     when(this.sessionFilter.getAgency()).thenReturn(null);
 
     boolean supports = this.agencySessionPageProvider.isSupported();
@@ -43,7 +43,7 @@ class AgencySessionPageProviderTest {
   }
 
   @Test
-  void executeQuery_Should_executeQueryOnRepository_When_pagebleIsGiven() {
+  public void executeQuery_Should_executeQueryOnRepository_When_pagebleIsGiven() {
     when(this.sessionFilter.getAgency()).thenReturn(1);
     PageRequest pageable = PageRequest.of(0, 1);
 

@@ -7,12 +7,12 @@ import static org.hamcrest.Matchers.is;
 import de.caritas.cob.userservice.api.adapters.web.dto.AliasMessageDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ForwardMessageDTO;
 import java.util.Optional;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-class AliasMessageConverterTest {
+public class AliasMessageConverterTest {
 
   @Test
-  void
+  public void
       convertStringToAliasMessageDTO_Should_returnOptionalEmpty_When_jsonStringCanNotBeConverted() {
     Optional<AliasMessageDTO> result =
         new AliasMessageConverter().convertStringToAliasMessageDTO("alias");
@@ -21,7 +21,7 @@ class AliasMessageConverterTest {
   }
 
   @Test
-  void
+  public void
       convertStringToForwardMessageDTO_Should_returnOptionalEmpty_When_jsonStringCanNotBeConverted() {
     Optional<ForwardMessageDTO> result =
         new AliasMessageConverter().convertStringToForwardMessageDTO("alias");
@@ -30,7 +30,7 @@ class AliasMessageConverterTest {
   }
 
   @Test
-  void
+  public void
       convertStringToAliasMessageDTO_Should_returnExpectedResult_When_jsonStringContainsMessageTypeFinishedConversation() {
     var result =
         new AliasMessageConverter()

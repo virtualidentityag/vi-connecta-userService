@@ -8,15 +8,15 @@ import static org.mockito.Mockito.when;
 
 import de.caritas.cob.userservice.api.adapters.web.dto.SessionFilter;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.PageRequest;
 
-@ExtendWith(MockitoExtension.class)
-class AskerSessionPageProviderTest {
+@RunWith(MockitoJUnitRunner.class)
+public class AskerSessionPageProviderTest {
 
   @InjectMocks private AskerSessionPageProvider askerSessionPageProvider;
 
@@ -25,7 +25,7 @@ class AskerSessionPageProviderTest {
   @Mock private SessionFilter sessionFilter;
 
   @Test
-  void supports_Should_returnTrue_When_askerFilterIsSet() {
+  public void supports_Should_returnTrue_When_askerFilterIsSet() {
     when(this.sessionFilter.getAsker()).thenReturn("asker");
 
     boolean supports = this.askerSessionPageProvider.isSupported();
@@ -34,7 +34,7 @@ class AskerSessionPageProviderTest {
   }
 
   @Test
-  void supports_Should_returnFalse_When_askerFilterIsNotSet() {
+  public void supports_Should_returnFalse_When_askerFilterIsNotSet() {
     when(this.sessionFilter.getAsker()).thenReturn(null);
 
     boolean supports = this.askerSessionPageProvider.isSupported();
@@ -43,7 +43,7 @@ class AskerSessionPageProviderTest {
   }
 
   @Test
-  void executeQuery_Should_executeQueryOnRepository_When_pagebleIsGiven() {
+  public void executeQuery_Should_executeQueryOnRepository_When_pagebleIsGiven() {
     when(this.sessionFilter.getAsker()).thenReturn("asker");
     PageRequest pageable = PageRequest.of(0, 1);
 

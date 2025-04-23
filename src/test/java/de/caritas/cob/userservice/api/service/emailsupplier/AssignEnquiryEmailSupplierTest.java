@@ -18,14 +18,14 @@ import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class AssignEnquiryEmailSupplierTest {
 
   private AssignEnquiryEmailSupplier assignEnquiryEmailSupplier;
@@ -36,7 +36,7 @@ public class AssignEnquiryEmailSupplierTest {
 
   @Mock private Logger logger;
 
-  @BeforeEach
+  @Before
   public void setup() {
     String applicationBaseUrl = "application base url";
     String askerUserName = "asker user name";

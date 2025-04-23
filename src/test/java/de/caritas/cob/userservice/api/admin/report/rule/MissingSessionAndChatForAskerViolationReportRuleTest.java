@@ -14,13 +14,13 @@ import de.caritas.cob.userservice.api.port.out.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.jeasy.random.EasyRandom;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class MissingSessionAndChatForAskerViolationReportRuleTest {
 
   @InjectMocks private MissingSessionAndChatForAskerViolationReportRule reportRule;

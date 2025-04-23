@@ -1,7 +1,6 @@
 package de.caritas.cob.userservice.api.service.mobilepushmessage;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -16,15 +15,15 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import de.caritas.cob.userservice.api.service.LogService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class FirebasePushMessageServiceTest {
 
   @InjectMocks private FirebasePushMessageService firebasePushMessageService;
@@ -33,7 +32,7 @@ public class FirebasePushMessageServiceTest {
 
   @Mock private Logger logger;
 
-  @BeforeEach
+  @Before
   public void setup() {
     setField(firebasePushMessageService, "firebaseMessaging", firebaseMessaging);
     setInternalState(LogService.class, "LOGGER", logger);
@@ -49,14 +48,10 @@ public class FirebasePushMessageServiceTest {
     verify(this.logger, times(1)).info("Firebase push notifications are disabled");
   }
 
-  @Test
+  @Test(expected = Exception.class)
   public void initializeFirebase_Should_throwException_When_configurationCanNotBeLoaded() {
-    assertThrows(
-        Exception.class,
-        () -> {
-          setField(this.firebasePushMessageService, "isEnabled", true);
-          this.firebasePushMessageService.initializeFirebase();
-        });
+    setField(this.firebasePushMessageService, "isEnabled", true);
+    this.firebasePushMessageService.initializeFirebase();
   }
 
   @Test

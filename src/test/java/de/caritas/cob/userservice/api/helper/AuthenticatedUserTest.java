@@ -1,54 +1,36 @@
 package de.caritas.cob.userservice.api.helper;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class AuthenticatedUserTest {
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void AuthenticatedUser_Should_ThrowNullPointerExceptionWhenArgumentsAreNull()
       throws Exception {
-    assertThrows(
-        NullPointerException.class,
-        () -> {
-          new AuthenticatedUser(null, null, null, null, null);
-        });
+    new AuthenticatedUser(null, null, null, null, null);
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void AuthenticatedUser_Should_ThrowNullPointerExceptionWhenUserIdIsNull()
       throws Exception {
-    assertThrows(
-        NullPointerException.class,
-        () -> {
-          AuthenticatedUser authenticatedUser = new AuthenticatedUser();
-          authenticatedUser.setUserId(null);
-        });
+    AuthenticatedUser authenticatedUser = new AuthenticatedUser();
+    authenticatedUser.setUserId(null);
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void AuthenticatedUser_Should_ThrowNullPointerExceptionWhenUsernameIsNull()
       throws Exception {
-    assertThrows(
-        NullPointerException.class,
-        () -> {
-          AuthenticatedUser authenticatedUser = new AuthenticatedUser();
-          authenticatedUser.setUsername(null);
-        });
+    AuthenticatedUser authenticatedUser = new AuthenticatedUser();
+    authenticatedUser.setUsername(null);
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void AuthenticatedUser_Should_ThrowNullPointerExceptionWhenAccessTokenIsNull()
       throws Exception {
-    assertThrows(
-        NullPointerException.class,
-        () -> {
-          AuthenticatedUser authenticatedUser = new AuthenticatedUser();
-          authenticatedUser.setAccessToken(null);
-        });
+    AuthenticatedUser authenticatedUser = new AuthenticatedUser();
+    authenticatedUser.setAccessToken(null);
   }
 }

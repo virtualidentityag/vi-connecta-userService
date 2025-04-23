@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.admin.service.consultant;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -18,13 +17,13 @@ import de.caritas.cob.userservice.api.port.out.ConsultantRepository;
 import de.caritas.cob.userservice.api.port.out.SessionRepository;
 import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import java.util.Optional;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ConsultantAdminServiceTest {
 
   @InjectMocks private ConsultantAdminService consultantAdminService;
@@ -45,17 +44,12 @@ public class ConsultantAdminServiceTest {
 
   @Mock private AccountManager accountManager;
 
-  @Test
+  @Test(expected = NotFoundException.class)
   public void
       markConsultantForDeletion_Should_throwNotFoundException_When_consultantdoesNotExist() {
-    assertThrows(
-        NotFoundException.class,
-        () -> {
-          when(this.consultantRepository.findByIdAndDeleteDateIsNull(any()))
-              .thenReturn(Optional.empty());
+    when(this.consultantRepository.findByIdAndDeleteDateIsNull(any())).thenReturn(Optional.empty());
 
-          this.consultantAdminService.markConsultantForDeletion("id", false);
-        });
+    this.consultantAdminService.markConsultantForDeletion("id", false);
   }
 
   @Test

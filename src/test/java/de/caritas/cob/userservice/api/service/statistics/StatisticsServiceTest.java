@@ -12,23 +12,20 @@ import de.caritas.cob.userservice.api.service.statistics.event.AssignSessionStat
 import de.caritas.cob.userservice.statisticsservice.generated.web.model.EventType;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.core.MessageProperties;
 
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
-class StatisticsServiceTest {
+@RunWith(MockitoJUnitRunner.class)
+public class StatisticsServiceTest {
 
   private static final String FIELD_NAME_STATISTICS_ENABLED = "statisticsEnabled";
   private static final String FIELD_NAME_RABBIT_EXCHANGE_NAME = "rabbitMqExchangeName";
@@ -42,8 +39,8 @@ class StatisticsServiceTest {
   @Mock private AmqpTemplate amqpTemplate;
   @Mock Logger logger;
 
-  @BeforeEach
-  void setup() {
+  @Before
+  public void setup() {
     assignSessionStatisticsEvent = Mockito.mock(AssignSessionStatisticsEvent.class);
     when(assignSessionStatisticsEvent.getEventType()).thenReturn(eventType);
     when(assignSessionStatisticsEvent.getPayload()).thenReturn(Optional.of(PAYLOAD));
@@ -52,7 +49,7 @@ class StatisticsServiceTest {
   }
 
   @Test
-  void fireEvent_Should_NotSendStatisticsMessage_WhenStatisticsIsDisabled() {
+  public void fireEvent_Should_NotSendStatisticsMessage_WhenStatisticsIsDisabled() {
 
     setField(statisticsService, FIELD_NAME_STATISTICS_ENABLED, false);
     statisticsService.fireEvent(assignSessionStatisticsEvent);
@@ -61,7 +58,7 @@ class StatisticsServiceTest {
   }
 
   @Test
-  void fireEvent_Should_SendStatisticsMessage_WhenStatisticsIsEnabled() {
+  public void fireEvent_Should_SendStatisticsMessage_WhenStatisticsIsEnabled() {
 
     setField(statisticsService, FIELD_NAME_STATISTICS_ENABLED, true);
     when(assignSessionStatisticsEvent.getEventType()).thenReturn(eventType);
@@ -73,7 +70,7 @@ class StatisticsServiceTest {
   }
 
   @Test
-  void fireEvent_Should_LogWarning_WhenPayloadIsEmpty() {
+  public void fireEvent_Should_LogWarning_WhenPayloadIsEmpty() {
 
     setField(statisticsService, FIELD_NAME_STATISTICS_ENABLED, true);
     when(assignSessionStatisticsEvent.getPayload()).thenReturn(Optional.empty());
@@ -82,7 +79,7 @@ class StatisticsServiceTest {
   }
 
   @Test
-  void fireEvent_Should_UseEventTypeAsTopicAndSendPayloadOfEvent() {
+  public void fireEvent_Should_UseEventTypeAsTopicAndSendPayloadOfEvent() {
 
     setField(statisticsService, FIELD_NAME_STATISTICS_ENABLED, true);
     statisticsService.fireEvent(assignSessionStatisticsEvent);

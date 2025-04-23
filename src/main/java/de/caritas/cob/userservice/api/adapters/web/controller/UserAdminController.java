@@ -171,7 +171,8 @@ public class UserAdminController implements UseradminApi {
   @Override
   public ResponseEntity<Void> markConsultantForDeletion(
       @PathVariable String consultantId,
-      @Valid @RequestParam(required = false) Boolean forceDeleteSessions) {
+      @Valid @RequestParam(value = "forceDeleteSessions", required = false)
+          Boolean forceDeleteSessions) {
     this.consultantAdminFacade.markConsultantForDeletion(consultantId, forceDeleteSessions);
     return new ResponseEntity<>(HttpStatus.OK);
   }

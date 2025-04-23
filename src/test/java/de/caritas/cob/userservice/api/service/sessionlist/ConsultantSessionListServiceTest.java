@@ -14,7 +14,10 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.SESSION_ST
 import static java.util.Arrays.asList;
 import static java.util.Objects.nonNull;
 import static org.jsoup.helper.Validate.fail;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -29,16 +32,16 @@ import de.caritas.cob.userservice.api.service.session.SessionFilter;
 import de.caritas.cob.userservice.api.service.session.SessionService;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
-class ConsultantSessionListServiceTest {
+@RunWith(MockitoJUnitRunner.class)
+public class ConsultantSessionListServiceTest {
 
   @InjectMocks private ConsultantSessionListService consultantSessionListService;
   @Mock private SessionService sessionService;
@@ -47,18 +50,21 @@ class ConsultantSessionListServiceTest {
   @Mock private ConsultantChatEnricher consultantChatEnricher;
   @Mock private RocketChatCredentials rocketChatCredentials;
 
-  @BeforeEach
-  void setup() {}
-
-  @Test
-  void
-      retrieveSessionsForAuthenticatedConsultant_Should_ReturnOnlySessions_WhenQueryParameterSessionStatusIsNew() {
-
+  @Before
+  public void setup() {
     when(sessionService.getRegisteredEnquiriesForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
     when(this.consultantSessionEnricher.updateRequiredConsultantSessionValues(
             eq(CONSULTANT_SESSION_RESPONSE_DTO_LIST), any(), any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
+    when(this.consultantChatEnricher.updateRequiredConsultantChatValues(
+            eq(List.of(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE)), any(), any()))
+        .thenReturn(List.of(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE));
+  }
+
+  @Test
+  public void
+      retrieveSessionsForAuthenticatedConsultant_Should_ReturnOnlySessions_WhenQueryParameterSessionStatusIsNew() {
     when(rocketChatCredentials.getRocketChatToken()).thenReturn(RC_TOKEN);
 
     List<ConsultantSessionResponseDTO> result =
@@ -75,12 +81,7 @@ class ConsultantSessionListServiceTest {
   }
 
   @Test
-  void retrieveSessionsForAuthenticatedConsultant_ShouldNot_SendChatsInEnquiryList() {
-    when(sessionService.getRegisteredEnquiriesForConsultant(Mockito.any()))
-        .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(this.consultantSessionEnricher.updateRequiredConsultantSessionValues(
-            eq(CONSULTANT_SESSION_RESPONSE_DTO_LIST), any(), any()))
-        .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
+  public void retrieveSessionsForAuthenticatedConsultant_ShouldNot_SendChatsInEnquiryList() {
     when(rocketChatCredentials.getRocketChatToken()).thenReturn(RC_TOKEN);
 
     List<ConsultantSessionResponseDTO> result =
@@ -92,14 +93,7 @@ class ConsultantSessionListServiceTest {
   }
 
   @Test
-  void retrieveSessionsForAuthenticatedConsultant_Should_MergeSessionsAndChats() {
-
-    when(this.consultantSessionEnricher.updateRequiredConsultantSessionValues(
-            eq(CONSULTANT_SESSION_RESPONSE_DTO_LIST), any(), any()))
-        .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST);
-    when(this.consultantChatEnricher.updateRequiredConsultantChatValues(
-            eq(List.of(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE)), any(), any()))
-        .thenReturn(List.of(CONSULTANT_SESSION_RESPONSE_DTO_WITH_ENCRYPTED_CHAT_MESSAGE));
+  public void retrieveSessionsForAuthenticatedConsultant_Should_MergeSessionsAndChats() {
     when(chatService.getChatsForConsultant(Mockito.any()))
         .thenReturn(CONSULTANT_SESSION_RESPONSE_DTO_LIST_WITH_ENCRYPTED_CHAT_MESSAGE);
     when(sessionService.getActiveAndDoneSessionsForConsultant(Mockito.any()))
@@ -145,7 +139,7 @@ class ConsultantSessionListServiceTest {
   }
 
   @Test
-  void
+  public void
       retrieveTeamSessionsForAuthenticatedConsultant_Should_ReturnFilteredSessionList_WhenFeedbackFilter() {
     List<ConsultantSessionResponseDTO> responseDTOS =
         new ArrayList<>(
@@ -172,7 +166,7 @@ class ConsultantSessionListServiceTest {
   }
 
   @Test
-  void
+  public void
       retrieveSessionsForAuthenticatedConsultant_Should_returnEmptyList_When_SessionStatusIsInitial() {
     SessionListQueryParameter sessionListQueryParameter =
         createStandardSessionListQueryParameterObject(0);
