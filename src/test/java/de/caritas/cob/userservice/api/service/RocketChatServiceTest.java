@@ -91,6 +91,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.assertj.core.api.Fail;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.jeasy.random.EasyRandom;
@@ -125,9 +126,9 @@ class RocketChatServiceTest {
   private final GroupResponseDTO EMPTY_GROUP_RESPONSE_DTO =
       new GroupResponseDTO(null, false, null, null);
   private final SubscriptionsGetDTO SUBSCRIPTIONS_GET_DTO =
-      new SubscriptionsGetDTO(new SubscriptionsUpdateDTO[] {}, false, null, null);
+      new SubscriptionsGetDTO(new SubscriptionsUpdateDTO[]{}, false, null, null);
   private final RoomsGetDTO ROOMS_GET_DTO =
-      new RoomsGetDTO(new RoomsUpdateDTO[] {}, true, null, null);
+      new RoomsGetDTO(new RoomsUpdateDTO[]{}, true, null, null);
   private final ResponseEntity<SubscriptionsGetDTO> SUBSCRIPTIONS_GET_RESPONSE_ENTITY =
       new ResponseEntity<>(SUBSCRIPTIONS_GET_DTO, HttpStatus.OK);
   private final ResponseEntity<RoomsGetDTO> ROOMS_GET_RESPONSE_ENTITY =
@@ -157,40 +158,49 @@ class RocketChatServiceTest {
   private final UsersListReponseDTO USERS_LIST_RESPONSE_DTO_EMPTY =
       new UsersListReponseDTO(new RocketChatUserDTO[0]);
   private final UsersListReponseDTO USERS_LIST_RESPONSE_DTO =
-      new UsersListReponseDTO(new RocketChatUserDTO[] {ROCKET_CHAT_USER_DTO});
+      new UsersListReponseDTO(new RocketChatUserDTO[]{ROCKET_CHAT_USER_DTO});
   private final UsersListReponseDTO USERS_LIST_RESPONSE_DTO_WITH_2_USERS =
       new UsersListReponseDTO(
-          new RocketChatUserDTO[] {ROCKET_CHAT_USER_DTO, ROCKET_CHAT_USER_DTO_2});
+          new RocketChatUserDTO[]{ROCKET_CHAT_USER_DTO, ROCKET_CHAT_USER_DTO_2});
   private final GroupsListAllResponseDTO GROUPS_LIST_ALL_RESPONSE_DTO_EMPTY =
       new GroupsListAllResponseDTO(new GroupDTO[0], 1, 0, 0);
   private final GroupsListAllResponseDTO GROUPS_LIST_ALL_RESPONSE_DTO =
-      new GroupsListAllResponseDTO(new GroupDTO[] {GROUP_DTO, GROUP_DTO_2}, 0, 2, 10);
+      new GroupsListAllResponseDTO(new GroupDTO[]{GROUP_DTO, GROUP_DTO_2}, 0, 2, 10);
 
   private final GroupsListAllResponseDTO GROUPS_LIST_ALL_RESPONSE_DTO_PAGINATED =
-      new GroupsListAllResponseDTO(new GroupDTO[] {GROUP_DTO, GROUP_DTO_2}, 0, 100, 1000);
+      new GroupsListAllResponseDTO(new GroupDTO[]{GROUP_DTO, GROUP_DTO_2}, 0, 100, 1000);
 
   private final GroupsListAllResponseDTO
       GROUPS_LIST_ALL_RESPONSE_DTO_PAGINATED_WITH_TOTAL_ZERO_ELEMENTS =
-          new GroupsListAllResponseDTO(new GroupDTO[] {GROUP_DTO, GROUP_DTO_2}, 0, 0, 0);
+      new GroupsListAllResponseDTO(new GroupDTO[]{GROUP_DTO, GROUP_DTO_2}, 0, 0, 0);
   private final LocalDateTime DATETIME_OLDEST = nowInUtc();
   private final LocalDateTime DATETIME_LATEST = nowInUtc();
   private final String PASSWORD = "password";
   private final RocketChatConfig rocketChatConfig =
       new RocketChatConfig(new MockHttpServletRequest());
   private final ObjectMapper objectMapper = new ObjectMapper();
-  @Mock Logger logger;
-  @Mock RocketChatCredentialsProvider rcCredentialsHelper;
-  @InjectMocks private RocketChatService rocketChatService;
-  @Mock private RestTemplate restTemplate;
-  @Mock private MongoClient mockedMongoClient;
+  @Mock
+  Logger logger;
+  @Mock
+  RocketChatCredentialsProvider rcCredentialsHelper;
+  @InjectMocks
+  private RocketChatService rocketChatService;
+  @Mock
+  private RestTemplate restTemplate;
+  @Mock
+  private MongoClient mockedMongoClient;
 
-  @Mock private MongoDatabase mongoDatabase;
+  @Mock
+  private MongoDatabase mongoDatabase;
 
-  @Mock private MongoCollection<Document> mongoCollection;
+  @Mock
+  private MongoCollection<Document> mongoCollection;
 
-  @Mock private MongoCursor<Document> mongoCursor;
+  @Mock
+  private MongoCursor<Document> mongoCursor;
 
-  @Mock private FindIterable<Document> findIterable;
+  @Mock
+  private FindIterable<Document> findIterable;
 
   @BeforeEach
   void setup() {
@@ -200,13 +210,15 @@ class RocketChatServiceTest {
     setInternalState(RocketChatService.class, "log", logger);
   }
 
-  /** Method: createPrivateGroup */
+  /**
+   * Method: createPrivateGroup
+   */
   @Test
   void createPrivateGroup_Should_ReturnTheGroupId_WhenRocketChatApiCallWasSuccessfully()
       throws SecurityException, RocketChatCreateGroupException {
 
     when(restTemplate.postForObject(
-            ArgumentMatchers.anyString(), any(), ArgumentMatchers.<Class<GroupResponseDTO>>any()))
+        ArgumentMatchers.anyString(), any(), ArgumentMatchers.<Class<GroupResponseDTO>>any()))
         .thenReturn(GROUP_RESPONSE_DTO);
 
     Optional<GroupResponseDTO> result =
@@ -218,13 +230,13 @@ class RocketChatServiceTest {
 
   @Test
   void
-      createPrivateGroup_Should_ThrowRocketChatCreateGroupException_WhenApiCallFailsWithAnException()
-          throws SecurityException {
+  createPrivateGroup_Should_ThrowRocketChatCreateGroupException_WhenApiCallFailsWithAnException()
+      throws SecurityException {
 
     HttpServerErrorException httpServerErrorException =
         new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "HttpServerErrorException");
     when(restTemplate.postForObject(
-            ArgumentMatchers.anyString(), any(), ArgumentMatchers.<Class<GroupResponseDTO>>any()))
+        ArgumentMatchers.anyString(), any(), ArgumentMatchers.<Class<GroupResponseDTO>>any()))
         .thenThrow(httpServerErrorException);
 
     try {
@@ -235,16 +247,18 @@ class RocketChatServiceTest {
     }
   }
 
-  /** Method: deleteGroup */
+  /**
+   * Method: deleteGroup
+   */
   @Test
   void deleteGroup_Should_ReturnTrue_WhenApiCallIsSuccessful() throws SecurityException {
 
     GroupDeleteResponseDTO response = new GroupDeleteResponseDTO(true);
 
     when(restTemplate.postForObject(
-            ArgumentMatchers.anyString(),
-            any(),
-            ArgumentMatchers.<Class<GroupDeleteResponseDTO>>any()))
+        ArgumentMatchers.anyString(),
+        any(),
+        ArgumentMatchers.<Class<GroupDeleteResponseDTO>>any()))
         .thenReturn(response);
 
     boolean result = rocketChatService.rollbackGroup(GROUP_ID, RC_CREDENTIALS);
@@ -258,9 +272,9 @@ class RocketChatServiceTest {
     GroupDeleteResponseDTO response = new GroupDeleteResponseDTO(false);
 
     when(restTemplate.postForObject(
-            ArgumentMatchers.anyString(),
-            any(),
-            ArgumentMatchers.<Class<GroupDeleteResponseDTO>>any()))
+        ArgumentMatchers.anyString(),
+        any(),
+        ArgumentMatchers.<Class<GroupDeleteResponseDTO>>any()))
         .thenReturn(response);
 
     boolean result = rocketChatService.rollbackGroup(GROUP_ID, RC_CREDENTIALS);
@@ -276,7 +290,7 @@ class RocketChatServiceTest {
     HttpServerErrorException httpServerErrorException =
         new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "HttpServerErrorException");
     when(restTemplate.postForObject(
-            ArgumentMatchers.anyString(), any(), ArgumentMatchers.<Class<GroupResponseDTO>>any()))
+        ArgumentMatchers.anyString(), any(), ArgumentMatchers.<Class<GroupResponseDTO>>any()))
         .thenThrow(httpServerErrorException);
 
     rocketChatService.rollbackGroup(GROUP_ID, RC_CREDENTIALS);
@@ -284,7 +298,9 @@ class RocketChatServiceTest {
     verify(logger, atLeastOnce()).error(anyString(), anyString(), any(Exception.class));
   }
 
-  /** Method: addUserToGroup */
+  /**
+   * Method: addUserToGroup
+   */
   @Test
   void addUserToGroup_Should_ThrowRocketChatAddUserToGroupException_WheApiCallFails() {
 
@@ -303,7 +319,7 @@ class RocketChatServiceTest {
     GroupResponseDTO groupResponseDTO = new GroupResponseDTO(null, false, "error", "errorType");
 
     when(restTemplate.postForObject(
-            ArgumentMatchers.anyString(), any(), ArgumentMatchers.<Class<GroupResponseDTO>>any()))
+        ArgumentMatchers.anyString(), any(), ArgumentMatchers.<Class<GroupResponseDTO>>any()))
         .thenReturn(groupResponseDTO);
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
@@ -316,16 +332,18 @@ class RocketChatServiceTest {
     }
   }
 
-  /** Method: removeUserFromGroup */
+  /**
+   * Method: removeUserFromGroup
+   */
   @Test
   void
-      removeUserFromGroup_Should_ThrowRocketChatRemoveUserFromGroupException_WhenAPICallIsNotSuccessful()
-          throws RocketChatUserNotInitializedException {
+  removeUserFromGroup_Should_ThrowRocketChatRemoveUserFromGroupException_WhenAPICallIsNotSuccessful()
+      throws RocketChatUserNotInitializedException {
 
     Exception exception = new RuntimeException(MESSAGE);
 
     when(restTemplate.postForObject(
-            ArgumentMatchers.anyString(), any(), ArgumentMatchers.<Class<GroupResponseDTO>>any()))
+        ArgumentMatchers.anyString(), any(), ArgumentMatchers.<Class<GroupResponseDTO>>any()))
         .thenThrow(exception);
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
@@ -340,11 +358,11 @@ class RocketChatServiceTest {
 
   @Test
   void
-      removeUserFromGroup_Should_ThrowRocketChatRemoveUserFromGroupException_WhenAPIResponseIsUnSuccessful()
-          throws Exception {
+  removeUserFromGroup_Should_ThrowRocketChatRemoveUserFromGroupException_WhenAPIResponseIsUnSuccessful()
+      throws Exception {
 
     when(restTemplate.postForObject(
-            ArgumentMatchers.anyString(), any(), ArgumentMatchers.<Class<GroupResponseDTO>>any()))
+        ArgumentMatchers.anyString(), any(), ArgumentMatchers.<Class<GroupResponseDTO>>any()))
         .thenReturn(EMPTY_GROUP_RESPONSE_DTO);
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
@@ -357,16 +375,18 @@ class RocketChatServiceTest {
     }
   }
 
-  /** Method: createPrivateGroupWithSystemUser */
+  /**
+   * Method: createPrivateGroupWithSystemUser
+   */
   @Test
   void
-      createPrivateGroupWithSystemUser_Should_ReturnTheGroupId_When_RocketChatApiCallWasSuccessful()
-          throws Exception {
+  createPrivateGroupWithSystemUser_Should_ReturnTheGroupId_When_RocketChatApiCallWasSuccessful()
+      throws Exception {
 
     when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
 
     when(restTemplate.postForObject(
-            ArgumentMatchers.anyString(), any(), ArgumentMatchers.<Class<GroupResponseDTO>>any()))
+        ArgumentMatchers.anyString(), any(), ArgumentMatchers.<Class<GroupResponseDTO>>any()))
         .thenReturn(GROUP_RESPONSE_DTO);
 
     Optional<GroupResponseDTO> result =
@@ -376,11 +396,13 @@ class RocketChatServiceTest {
     assertEquals(GROUP_ID, result.get().getGroup().getId());
   }
 
-  /** Method: removeSystemMessages */
+  /**
+   * Method: removeSystemMessages
+   */
   @Test
   void
-      removeSystemMessages_Should_ThrowRocketChatRemoveSystemMessagesException_WhenApiCallFailsWithAnException()
-          throws RocketChatUserNotInitializedException {
+  removeSystemMessages_Should_ThrowRocketChatRemoveSystemMessagesException_WhenApiCallFailsWithAnException()
+      throws RocketChatUserNotInitializedException {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
@@ -388,9 +410,9 @@ class RocketChatServiceTest {
         new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "HttpServerErrorException");
 
     when(restTemplate.postForObject(
-            ArgumentMatchers.anyString(),
-            any(),
-            ArgumentMatchers.<Class<StandardResponseDTO>>any()))
+        ArgumentMatchers.anyString(),
+        any(),
+        ArgumentMatchers.<Class<StandardResponseDTO>>any()))
         .thenThrow(httpServerErrorException);
 
     try {
@@ -403,8 +425,8 @@ class RocketChatServiceTest {
 
   @Test
   void
-      removeSystemMessages_Should_ThrowRocketChatRemoveSystemMessagesException_WhenDateFormatIsWrong()
-          throws RocketChatUserNotInitializedException {
+  removeSystemMessages_Should_ThrowRocketChatRemoveSystemMessagesException_WhenDateFormatIsWrong()
+      throws RocketChatUserNotInitializedException {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
 
@@ -423,9 +445,9 @@ class RocketChatServiceTest {
         RocketChatRemoveSystemMessagesException.class,
         () -> {
           when(restTemplate.postForObject(
-                  ArgumentMatchers.anyString(),
-                  any(),
-                  ArgumentMatchers.<Class<StandardResponseDTO>>any()))
+              ArgumentMatchers.anyString(),
+              any(),
+              ArgumentMatchers.<Class<StandardResponseDTO>>any()))
               .thenReturn(STANDARD_RESPONSE_DTO_ERROR);
 
           when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
@@ -440,9 +462,9 @@ class RocketChatServiceTest {
   void removeSystemMessages_Should_NotThrowException_WhenApiCallIsSuccessful() throws Exception {
 
     when(restTemplate.postForObject(
-            ArgumentMatchers.anyString(),
-            any(),
-            ArgumentMatchers.<Class<StandardResponseDTO>>any()))
+        ArgumentMatchers.anyString(),
+        any(),
+        ArgumentMatchers.<Class<StandardResponseDTO>>any()))
         .thenReturn(STANDARD_RESPONSE_DTO_SUCCESS);
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
@@ -451,7 +473,9 @@ class RocketChatServiceTest {
         () -> rocketChatService.removeSystemMessages(GROUP_ID, DATETIME_OLDEST, DATETIME_LATEST));
   }
 
-  /** Method: getUserId */
+  /**
+   * Method: getUserId
+   */
   @Test
   void getUserId_Should_LoginUser() throws RocketChatLoginException {
 
@@ -459,9 +483,9 @@ class RocketChatServiceTest {
         .thenReturn(new ResponseEntity<>(LOGIN_RESPONSE_DTO_TECH_USER, HttpStatus.OK));
 
     when(restTemplate.postForEntity(
-            ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGOUT),
-            any(),
-            ArgumentMatchers.<Class<LogoutResponseDTO>>any()))
+        ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGOUT),
+        any(),
+        ArgumentMatchers.<Class<LogoutResponseDTO>>any()))
         .thenReturn(new ResponseEntity<>(LOGOUT_RESPONSE_DTO_WITH, HttpStatus.OK));
 
     rocketChatService.getUserID(USERNAME, PASSWORD, false);
@@ -476,9 +500,9 @@ class RocketChatServiceTest {
         .thenReturn(new ResponseEntity<>(LOGIN_RESPONSE_DTO_TECH_USER, HttpStatus.OK));
 
     when(restTemplate.postForEntity(
-            ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGOUT),
-            any(),
-            ArgumentMatchers.<Class<LogoutResponseDTO>>any()))
+        ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGOUT),
+        any(),
+        ArgumentMatchers.<Class<LogoutResponseDTO>>any()))
         .thenReturn(new ResponseEntity<>(LOGOUT_RESPONSE_DTO_WITH, HttpStatus.OK));
 
     rocketChatService.getUserID(USERNAME, PASSWORD, false);
@@ -493,9 +517,9 @@ class RocketChatServiceTest {
         .thenReturn(new ResponseEntity<>(LOGIN_RESPONSE_DTO_TECH_USER, HttpStatus.OK));
 
     when(restTemplate.postForEntity(
-            ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGOUT),
-            any(),
-            ArgumentMatchers.<Class<LogoutResponseDTO>>any()))
+        ArgumentMatchers.eq(RC_URL_CHAT_USER_LOGOUT),
+        any(),
+        ArgumentMatchers.<Class<LogoutResponseDTO>>any()))
         .thenReturn(new ResponseEntity<>(LOGOUT_RESPONSE_DTO_WITH, HttpStatus.OK));
 
     String result = rocketChatService.getUserID(USERNAME, PASSWORD, false);
@@ -503,16 +527,18 @@ class RocketChatServiceTest {
     assertEquals(LOGIN_RESPONSE_DTO_TECH_USER.getData().getUserId(), result);
   }
 
-  /** Method: getSubscriptionsOfUser */
+  /**
+   * Method: getSubscriptionsOfUser
+   */
   @Test
   void
-      getSubscriptionsOfUser_Should_ThrowInternalServerErrorException_When_APICallIsNotSuccessful() {
+  getSubscriptionsOfUser_Should_ThrowInternalServerErrorException_When_APICallIsNotSuccessful() {
 
     when(restTemplate.exchange(
-            ArgumentMatchers.anyString(),
-            any(),
-            any(),
-            ArgumentMatchers.<Class<SubscriptionsGetDTO>>any()))
+        ArgumentMatchers.anyString(),
+        any(),
+        any(),
+        ArgumentMatchers.<Class<SubscriptionsGetDTO>>any()))
         .thenThrow(HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR_EXCEPTION);
 
     try {
@@ -525,13 +551,13 @@ class RocketChatServiceTest {
 
   @Test
   void
-      getSubscriptionsOfUser_Should_ThrowInternalServerErrorException_When_APIResponseIsUnSuccessful() {
+  getSubscriptionsOfUser_Should_ThrowInternalServerErrorException_When_APIResponseIsUnSuccessful() {
 
     when(restTemplate.exchange(
-            ArgumentMatchers.anyString(),
-            any(),
-            any(),
-            ArgumentMatchers.<Class<SubscriptionsGetDTO>>any()))
+        ArgumentMatchers.anyString(),
+        any(),
+        any(),
+        ArgumentMatchers.<Class<SubscriptionsGetDTO>>any()))
         .thenReturn(SUBSCRIPTIONS_GET_RESPONSE_ENTITY_NOT_OK);
 
     try {
@@ -544,13 +570,13 @@ class RocketChatServiceTest {
 
   @Test
   void
-      getSubscriptionsOfUser_Should_ThrowUnauthorizedException_When_RocketChatReturnsUnauthorized() {
+  getSubscriptionsOfUser_Should_ThrowUnauthorizedException_When_RocketChatReturnsUnauthorized() {
 
     when(restTemplate.exchange(
-            ArgumentMatchers.anyString(),
-            any(),
-            any(),
-            ArgumentMatchers.<Class<SubscriptionsGetDTO>>any()))
+        ArgumentMatchers.anyString(),
+        any(),
+        any(),
+        ArgumentMatchers.<Class<SubscriptionsGetDTO>>any()))
         .thenThrow(HTTP_STATUS_CODE_UNAUTHORIZED_EXCEPTION);
 
     var thrown =
@@ -566,10 +592,10 @@ class RocketChatServiceTest {
   void getSubscriptionsOfUser_Should_ReturnListOfSubscriptionsUpdateDTO_When_APICallIsSuccessful() {
 
     when(restTemplate.exchange(
-            ArgumentMatchers.anyString(),
-            any(),
-            any(),
-            ArgumentMatchers.<Class<SubscriptionsGetDTO>>any()))
+        ArgumentMatchers.anyString(),
+        any(),
+        any(),
+        ArgumentMatchers.<Class<SubscriptionsGetDTO>>any()))
         .thenReturn(SUBSCRIPTIONS_GET_RESPONSE_ENTITY);
 
     assertThat(
@@ -577,14 +603,16 @@ class RocketChatServiceTest {
         everyItem(instanceOf(SubscriptionsUpdateDTO.class)));
   }
 
-  /** Method: getRoomsOfUser */
+  /**
+   * Method: getRoomsOfUser
+   */
   @Test
   void getRoomsOfUser_Should_ThrowInternalServerErrorException_When_APICallIsNotSuccessful() {
 
     Exception exception = new RuntimeException(MESSAGE);
 
     when(restTemplate.exchange(
-            ArgumentMatchers.anyString(), any(), any(), ArgumentMatchers.<Class<RoomsGetDTO>>any()))
+        ArgumentMatchers.anyString(), any(), any(), ArgumentMatchers.<Class<RoomsGetDTO>>any()))
         .thenThrow(exception);
 
     try {
@@ -599,7 +627,7 @@ class RocketChatServiceTest {
   void getRoomsOfUser_Should_ThrowInternalServerErrorException_When_APIResponseIsUnSuccessful() {
 
     when(restTemplate.exchange(
-            ArgumentMatchers.anyString(), any(), any(), ArgumentMatchers.<Class<RoomsGetDTO>>any()))
+        ArgumentMatchers.anyString(), any(), any(), ArgumentMatchers.<Class<RoomsGetDTO>>any()))
         .thenReturn(ROOMS_GET_RESPONSE_ENTITY_NOT_OK);
 
     try {
@@ -614,7 +642,7 @@ class RocketChatServiceTest {
   void getRoomsOfUser_Should_ReturnListOfRoomsUpdateDTO_WhenAPICallIsSuccessful() {
 
     when(restTemplate.exchange(
-            ArgumentMatchers.anyString(), any(), any(), ArgumentMatchers.<Class<RoomsGetDTO>>any()))
+        ArgumentMatchers.anyString(), any(), any(), ArgumentMatchers.<Class<RoomsGetDTO>>any()))
         .thenReturn(ROOMS_GET_RESPONSE_ENTITY);
 
     assertThat(
@@ -622,11 +650,13 @@ class RocketChatServiceTest {
         everyItem(instanceOf(RoomsUpdateDTO.class)));
   }
 
-  /** Method: removeAllStandardUsersFromGroup */
+  /**
+   * Method: removeAllStandardUsersFromGroup
+   */
   @Test
   void
-      removeAllStandardUsersFromGroup_Should_ThrowRocketChatGetGroupMembersException_WhenGroupListIsEmpty()
-          throws Exception {
+  removeAllStandardUsersFromGroup_Should_ThrowRocketChatGetGroupMembersException_WhenGroupListIsEmpty()
+      throws Exception {
 
     RocketChatService spy = Mockito.spy(rocketChatService);
 
@@ -661,14 +691,16 @@ class RocketChatServiceTest {
     verify(spy, times(1)).removeUserFromGroup(GROUP_MEMBER_USER_2.get_id(), GROUP_ID);
   }
 
-  /** Method: removeAllMessages */
+  /**
+   * Method: removeAllMessages
+   */
   @Test
   void removeAllMessages_Should_NotThrowException_WhenRemoveMessagesSucceeded() throws Exception {
 
     when(restTemplate.postForObject(
-            ArgumentMatchers.anyString(),
-            any(),
-            ArgumentMatchers.<Class<StandardResponseDTO>>any()))
+        ArgumentMatchers.anyString(),
+        any(),
+        ArgumentMatchers.<Class<StandardResponseDTO>>any()))
         .thenReturn(STANDARD_RESPONSE_DTO_SUCCESS);
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
@@ -678,15 +710,15 @@ class RocketChatServiceTest {
 
   @Test
   void
-      removeAllMessages_Should_ThrowRocketChatRemoveSystemMessagesException_WhenRemoveMessagesFails()
-          throws Exception {
+  removeAllMessages_Should_ThrowRocketChatRemoveSystemMessagesException_WhenRemoveMessagesFails()
+      throws Exception {
     assertThrows(
         RocketChatRemoveSystemMessagesException.class,
         () -> {
           when(restTemplate.postForObject(
-                  ArgumentMatchers.anyString(),
-                  any(),
-                  ArgumentMatchers.<Class<StandardResponseDTO>>any()))
+              ArgumentMatchers.anyString(),
+              any(),
+              ArgumentMatchers.<Class<StandardResponseDTO>>any()))
               .thenReturn(STANDARD_RESPONSE_DTO_ERROR);
 
           when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
@@ -695,10 +727,12 @@ class RocketChatServiceTest {
         });
   }
 
-  /** Method: getStandardMembersOfGroup */
+  /**
+   * Method: getStandardMembersOfGroup
+   */
   @Test
   void
-      getStandardMembersOfGroup_Should_ThrowRocketChatGetGroupMembersException_WhenAPICallIsNotSuccessful() {
+  getStandardMembersOfGroup_Should_ThrowRocketChatGetGroupMembersException_WhenAPICallIsNotSuccessful() {
 
     Exception exception = new RuntimeException(MESSAGE);
 
@@ -714,8 +748,8 @@ class RocketChatServiceTest {
 
   @Test
   void
-      getStandardMembersOfGroup_Should_ThrowRocketChatGetGroupMembersException_WhenAPIResponseIsUnSuccessful()
-          throws Exception {
+  getStandardMembersOfGroup_Should_ThrowRocketChatGetGroupMembersException_WhenAPIResponseIsUnSuccessful()
+      throws Exception {
     try {
       rocketChatService.getStandardMembersOfGroup(GROUP_ID);
       fail("Expected exception: RocketChatGetGroupMembersException");
@@ -743,7 +777,9 @@ class RocketChatServiceTest {
     assertEquals("a", result.get(0).get_id());
   }
 
-  /** Method: getUserInfo */
+  /**
+   * Method: getUserInfo
+   */
   @Test
   void getUserInfo_Should_ThrowInternalServerExceptionException_WhenAPICallFails()
       throws RocketChatUserNotInitializedException {
@@ -756,11 +792,11 @@ class RocketChatServiceTest {
 
           when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
           when(restTemplate.exchange(
-                  ArgumentMatchers.anyString(),
-                  any(),
-                  any(),
-                  ArgumentMatchers.<Class<UserInfoResponseDTO>>any(),
-                  anyString()))
+              ArgumentMatchers.anyString(),
+              any(),
+              any(),
+              ArgumentMatchers.<Class<UserInfoResponseDTO>>any(),
+              anyString()))
               .thenThrow(exception);
 
           rocketChatService.getUserInfo(RC_USER_ID);
@@ -775,11 +811,11 @@ class RocketChatServiceTest {
         () -> {
           when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
           when(restTemplate.exchange(
-                  anyString(),
-                  eq(HttpMethod.GET),
-                  any(),
-                  eq(UserInfoResponseDTO.class),
-                  anyString()))
+              anyString(),
+              eq(HttpMethod.GET),
+              any(),
+              eq(UserInfoResponseDTO.class),
+              anyString()))
               .thenReturn(new ResponseEntity<>(USER_INFO_RESPONSE_DTO_FAILED, HttpStatus.OK));
 
           rocketChatService.getUserInfo(RC_USER_ID);
@@ -792,11 +828,11 @@ class RocketChatServiceTest {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate.exchange(
-            ArgumentMatchers.anyString(),
-            any(),
-            any(),
-            ArgumentMatchers.<Class<UserInfoResponseDTO>>any(),
-            anyString()))
+        ArgumentMatchers.anyString(),
+        any(),
+        any(),
+        ArgumentMatchers.<Class<UserInfoResponseDTO>>any(),
+        anyString()))
         .thenReturn(new ResponseEntity<>(USER_INFO_RESPONSE_DTO, HttpStatus.OK));
 
     UserInfoResponseDTO result = rocketChatService.getUserInfo(RC_USER_ID);
@@ -810,7 +846,7 @@ class RocketChatServiceTest {
         new EasyRandom().nextObject(UserUpdateRequestDTO.class);
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate.exchange(
-            eq(RC_URL_CHAT_USER_UPDATE), eq(HttpMethod.POST), any(), eq(UserInfoResponseDTO.class)))
+        eq(RC_URL_CHAT_USER_UPDATE), eq(HttpMethod.POST), any(), eq(UserInfoResponseDTO.class)))
         .thenReturn(new ResponseEntity<>(USER_INFO_RESPONSE_DTO, HttpStatus.OK));
 
     this.rocketChatService.updateUser(userUpdateRequestDTO);
@@ -830,10 +866,10 @@ class RocketChatServiceTest {
               new EasyRandom().nextObject(UserUpdateRequestDTO.class);
           when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
           when(restTemplate.exchange(
-                  eq(RC_URL_CHAT_USER_UPDATE),
-                  eq(HttpMethod.POST),
-                  any(),
-                  eq(UserInfoResponseDTO.class)))
+              eq(RC_URL_CHAT_USER_UPDATE),
+              eq(HttpMethod.POST),
+              any(),
+              eq(UserInfoResponseDTO.class)))
               .thenReturn(new ResponseEntity<>(new UserInfoResponseDTO(), HttpStatus.OK));
 
           this.rocketChatService.updateUser(userUpdateRequestDTO);
@@ -850,10 +886,10 @@ class RocketChatServiceTest {
               new EasyRandom().nextObject(UserUpdateRequestDTO.class);
           when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
           when(restTemplate.exchange(
-                  eq(RC_URL_CHAT_USER_UPDATE),
-                  eq(HttpMethod.POST),
-                  any(),
-                  eq(UserInfoResponseDTO.class)))
+              eq(RC_URL_CHAT_USER_UPDATE),
+              eq(HttpMethod.POST),
+              any(),
+              eq(UserInfoResponseDTO.class)))
               .thenThrow(mock(RestClientResponseException.class));
 
           this.rocketChatService.updateUser(userUpdateRequestDTO);
@@ -864,7 +900,7 @@ class RocketChatServiceTest {
   void deleteUser_Should_performRocketDeleteUser() throws Exception {
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate.exchange(
-            eq(RC_URL_CHAT_USER_DELETE), eq(HttpMethod.POST), any(), eq(UserInfoResponseDTO.class)))
+        eq(RC_URL_CHAT_USER_DELETE), eq(HttpMethod.POST), any(), eq(UserInfoResponseDTO.class)))
         .thenReturn(new ResponseEntity<>(USER_INFO_RESPONSE_DTO, HttpStatus.OK));
 
     this.rocketChatService.deleteUser("");
@@ -884,7 +920,7 @@ class RocketChatServiceTest {
             "The required \"userId\" or \"username\" param provided does not match any users [error-invalid-user]",
             "error-invalid-user");
     when(restTemplate.exchange(
-            eq(RC_URL_CHAT_USER_DELETE), eq(HttpMethod.POST), any(), eq(UserInfoResponseDTO.class)))
+        eq(RC_URL_CHAT_USER_DELETE), eq(HttpMethod.POST), any(), eq(UserInfoResponseDTO.class)))
         .thenReturn(new ResponseEntity<>(response, HttpStatus.BAD_REQUEST));
 
     rocketChatService.deleteUser("");
@@ -902,10 +938,10 @@ class RocketChatServiceTest {
         () -> {
           when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
           when(restTemplate.exchange(
-                  eq(RC_URL_CHAT_USER_DELETE),
-                  eq(HttpMethod.POST),
-                  any(),
-                  eq(UserInfoResponseDTO.class)))
+              eq(RC_URL_CHAT_USER_DELETE),
+              eq(HttpMethod.POST),
+              any(),
+              eq(UserInfoResponseDTO.class)))
               .thenReturn(new ResponseEntity<>(new UserInfoResponseDTO(), HttpStatus.OK));
 
           this.rocketChatService.deleteUser("");
@@ -925,15 +961,15 @@ class RocketChatServiceTest {
 
   @Test
   void
-      deleteGroupAsTechnicalUser_Should_throwRocketChatDeleteUserException_When_responseIsNotSuccess()
-          throws Exception {
-    assertThrows(
-        RocketChatDeleteGroupException.class,
-        () -> {
-          when(rcCredentialsHelper.getTechnicalUser()).thenThrow(new RuntimeException());
+  deleteGroupAsTechnicalUser_Should_notthrowRocketChatDeleteUserException_When_technicalUserCannotBeAddedToTheGroup()
+      throws Exception {
+    when(rcCredentialsHelper.getTechnicalUser()).thenThrow(new RuntimeException());
 
-          this.rocketChatService.deleteGroupAsTechnicalUser("");
-        });
+    try {
+      this.rocketChatService.deleteGroupAsTechnicalUser("");
+    } catch (RocketChatDeleteGroupException ex) {
+      Fail.fail("Should not throw RocketChatDeleteGroupException");
+    }
   }
 
   @Test
@@ -965,10 +1001,10 @@ class RocketChatServiceTest {
   void setRoomReadOnly_Should_performRocketChatSetRoomReadOnly() throws Exception {
     when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
     when(restTemplate.exchange(
-            eq(RC_URL_GROUPS_SET_READ_ONLY),
-            eq(HttpMethod.POST),
-            any(),
-            eq(GroupResponseDTO.class)))
+        eq(RC_URL_GROUPS_SET_READ_ONLY),
+        eq(HttpMethod.POST),
+        any(),
+        eq(GroupResponseDTO.class)))
         .thenReturn(new ResponseEntity<>(new GroupResponseDTO(), HttpStatus.OK));
 
     this.rocketChatService.setRoomReadOnly(RC_GROUP_ID);
@@ -993,10 +1029,10 @@ class RocketChatServiceTest {
     GroupResponseDTO groupResponseDTO = new GroupResponseDTO();
     groupResponseDTO.setSuccess(false);
     when(restTemplate.exchange(
-            eq(RC_URL_GROUPS_SET_READ_ONLY),
-            eq(HttpMethod.POST),
-            any(),
-            eq(GroupResponseDTO.class)))
+        eq(RC_URL_GROUPS_SET_READ_ONLY),
+        eq(HttpMethod.POST),
+        any(),
+        eq(GroupResponseDTO.class)))
         .thenReturn(new ResponseEntity<>(groupResponseDTO, HttpStatus.OK));
 
     this.rocketChatService.setRoomReadOnly("");
@@ -1009,10 +1045,10 @@ class RocketChatServiceTest {
   void setRoomWriteable_Should_performRocketChatSetRoomReadOnly() throws Exception {
     when(rcCredentialsHelper.getSystemUser()).thenReturn(RC_CREDENTIALS_SYSTEM_A);
     when(restTemplate.exchange(
-            eq(RC_URL_GROUPS_SET_READ_ONLY),
-            eq(HttpMethod.POST),
-            any(),
-            eq(GroupResponseDTO.class)))
+        eq(RC_URL_GROUPS_SET_READ_ONLY),
+        eq(HttpMethod.POST),
+        any(),
+        eq(GroupResponseDTO.class)))
         .thenReturn(new ResponseEntity<>(new GroupResponseDTO(), HttpStatus.OK));
 
     this.rocketChatService.setRoomWriteable(RC_GROUP_ID);
@@ -1037,10 +1073,10 @@ class RocketChatServiceTest {
     GroupResponseDTO groupResponseDTO = new GroupResponseDTO();
     groupResponseDTO.setSuccess(false);
     when(restTemplate.exchange(
-            eq(RC_URL_GROUPS_SET_READ_ONLY),
-            eq(HttpMethod.POST),
-            any(),
-            eq(GroupResponseDTO.class)))
+        eq(RC_URL_GROUPS_SET_READ_ONLY),
+        eq(HttpMethod.POST),
+        any(),
+        eq(GroupResponseDTO.class)))
         .thenReturn(new ResponseEntity<>(groupResponseDTO, HttpStatus.OK));
 
     this.rocketChatService.setRoomWriteable("");
@@ -1056,11 +1092,11 @@ class RocketChatServiceTest {
     HttpServerErrorException httpServerErrorException =
         new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "HttpServerErrorException");
     when(restTemplate.exchange(
-            anyString(),
-            eq(HttpMethod.GET),
-            any(),
-            eq(GroupsListAllResponseDTO.class),
-            anyString()))
+        anyString(),
+        eq(HttpMethod.GET),
+        any(),
+        eq(GroupsListAllResponseDTO.class),
+        anyString()))
         .thenThrow(httpServerErrorException);
 
     try {
@@ -1074,16 +1110,16 @@ class RocketChatServiceTest {
 
   @Test
   void
-      fetchAllInactivePrivateGroupsSinceGivenDate_Should_ThrowException_WhenHttpStatusFromRocketChatCallIsNotOk()
-          throws RocketChatUserNotInitializedException {
+  fetchAllInactivePrivateGroupsSinceGivenDate_Should_ThrowException_WhenHttpStatusFromRocketChatCallIsNotOk()
+      throws RocketChatUserNotInitializedException {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate.exchange(
-            anyString(),
-            eq(HttpMethod.GET),
-            any(),
-            eq(GroupsListAllResponseDTO.class),
-            anyString()))
+        anyString(),
+        eq(HttpMethod.GET),
+        any(),
+        eq(GroupsListAllResponseDTO.class),
+        anyString()))
         .thenReturn(
             new ResponseEntity<>(GROUPS_LIST_ALL_RESPONSE_DTO_EMPTY, HttpStatus.BAD_REQUEST));
 
@@ -1102,11 +1138,11 @@ class RocketChatServiceTest {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate.exchange(
-            anyString(),
-            eq(HttpMethod.GET),
-            any(),
-            eq(GroupsListAllResponseDTO.class),
-            anyString()))
+        anyString(),
+        eq(HttpMethod.GET),
+        any(),
+        eq(GroupsListAllResponseDTO.class),
+        anyString()))
         .thenReturn(new ResponseEntity<>(GROUPS_LIST_ALL_RESPONSE_DTO, HttpStatus.OK));
 
     List<GroupDTO> result =
@@ -1125,11 +1161,11 @@ class RocketChatServiceTest {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate.exchange(
-            anyString(),
-            eq(HttpMethod.GET),
-            any(),
-            eq(GroupsListAllResponseDTO.class),
-            anyString()))
+        anyString(),
+        eq(HttpMethod.GET),
+        any(),
+        eq(GroupsListAllResponseDTO.class),
+        anyString()))
         .thenReturn(new ResponseEntity<>(GROUPS_LIST_ALL_RESPONSE_DTO, HttpStatus.OK));
 
     this.rocketChatService.fetchAllInactivePrivateGroupsSinceGivenDate(dateToCheck);
@@ -1148,18 +1184,18 @@ class RocketChatServiceTest {
 
   @Test
   void
-      fetchAllInactivePrivateGroupsSinceGivenDate_Should_CallRocketChatApiMultipleTimes_When_ResultIsPaginated()
-          throws RocketChatUserNotInitializedException, RocketChatGetGroupsListAllException {
+  fetchAllInactivePrivateGroupsSinceGivenDate_Should_CallRocketChatApiMultipleTimes_When_ResultIsPaginated()
+      throws RocketChatUserNotInitializedException, RocketChatGetGroupsListAllException {
 
     LocalDateTime dateToCheck = LocalDateTime.of(2021, 1, 1, 0, 0, 0);
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate.exchange(
-            anyString(),
-            eq(HttpMethod.GET),
-            any(),
-            eq(GroupsListAllResponseDTO.class),
-            anyString()))
+        anyString(),
+        eq(HttpMethod.GET),
+        any(),
+        eq(GroupsListAllResponseDTO.class),
+        anyString()))
         .thenReturn(new ResponseEntity<>(GROUPS_LIST_ALL_RESPONSE_DTO_PAGINATED, HttpStatus.OK));
 
     this.rocketChatService.fetchAllInactivePrivateGroupsSinceGivenDate(dateToCheck);
@@ -1178,18 +1214,18 @@ class RocketChatServiceTest {
 
   @Test
   void
-      fetchAllInactivePrivateGroupsSinceGivenDate_Should_CallRocketChatApiOnlyOnce_When_ResponseContainsTotalOfZeroElements()
-          throws RocketChatUserNotInitializedException, RocketChatGetGroupsListAllException {
+  fetchAllInactivePrivateGroupsSinceGivenDate_Should_CallRocketChatApiOnlyOnce_When_ResponseContainsTotalOfZeroElements()
+      throws RocketChatUserNotInitializedException, RocketChatGetGroupsListAllException {
 
     LocalDateTime dateToCheck = LocalDateTime.of(2021, 1, 1, 0, 0, 0);
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate.exchange(
-            anyString(),
-            eq(HttpMethod.GET),
-            any(),
-            eq(GroupsListAllResponseDTO.class),
-            anyString()))
+        anyString(),
+        eq(HttpMethod.GET),
+        any(),
+        eq(GroupsListAllResponseDTO.class),
+        anyString()))
         .thenReturn(
             new ResponseEntity<>(
                 GROUPS_LIST_ALL_RESPONSE_DTO_PAGINATED_WITH_TOTAL_ZERO_ELEMENTS, HttpStatus.OK));
@@ -1216,12 +1252,12 @@ class RocketChatServiceTest {
     HttpServerErrorException httpServerErrorException =
         new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "HttpServerErrorException");
     when(restTemplate.exchange(
-            anyString(),
-            eq(HttpMethod.GET),
-            any(),
-            eq(UsersListReponseDTO.class),
-            anyString(),
-            anyString()))
+        anyString(),
+        eq(HttpMethod.GET),
+        any(),
+        eq(UsersListReponseDTO.class),
+        anyString(),
+        anyString()))
         .thenThrow(httpServerErrorException);
 
     try {
@@ -1239,12 +1275,12 @@ class RocketChatServiceTest {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate.exchange(
-            anyString(),
-            eq(HttpMethod.GET),
-            any(),
-            eq(UsersListReponseDTO.class),
-            anyString(),
-            anyString()))
+        anyString(),
+        eq(HttpMethod.GET),
+        any(),
+        eq(UsersListReponseDTO.class),
+        anyString(),
+        anyString()))
         .thenReturn(new ResponseEntity<>(USERS_LIST_RESPONSE_DTO_EMPTY, HttpStatus.OK));
 
     try {
@@ -1262,12 +1298,12 @@ class RocketChatServiceTest {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate.exchange(
-            anyString(),
-            eq(HttpMethod.GET),
-            any(),
-            eq(UsersListReponseDTO.class),
-            anyString(),
-            anyString()))
+        anyString(),
+        eq(HttpMethod.GET),
+        any(),
+        eq(UsersListReponseDTO.class),
+        anyString(),
+        anyString()))
         .thenReturn(new ResponseEntity<>(USERS_LIST_RESPONSE_DTO_WITH_2_USERS, HttpStatus.OK));
 
     try {
@@ -1285,12 +1321,12 @@ class RocketChatServiceTest {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate.exchange(
-            anyString(),
-            eq(HttpMethod.GET),
-            any(),
-            eq(UsersListReponseDTO.class),
-            anyString(),
-            anyString()))
+        anyString(),
+        eq(HttpMethod.GET),
+        any(),
+        eq(UsersListReponseDTO.class),
+        anyString(),
+        anyString()))
         .thenReturn(new ResponseEntity<>(USERS_LIST_RESPONSE_DTO_EMPTY, HttpStatus.BAD_REQUEST));
 
     try {
@@ -1308,12 +1344,12 @@ class RocketChatServiceTest {
 
     when(rcCredentialsHelper.getTechnicalUser()).thenReturn(RC_CREDENTIALS_TECHNICAL_A);
     when(restTemplate.exchange(
-            anyString(),
-            eq(HttpMethod.GET),
-            any(),
-            eq(UsersListReponseDTO.class),
-            anyString(),
-            anyString()))
+        anyString(),
+        eq(HttpMethod.GET),
+        any(),
+        eq(UsersListReponseDTO.class),
+        anyString(),
+        anyString()))
         .thenReturn(new ResponseEntity<>(USERS_LIST_RESPONSE_DTO, HttpStatus.OK));
 
     String result = this.rocketChatService.getRocketChatUserIdByUsername(USERNAME);
