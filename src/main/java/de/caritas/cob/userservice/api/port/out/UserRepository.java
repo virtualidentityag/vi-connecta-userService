@@ -16,9 +16,11 @@ public interface UserRepository extends CrudRepository<User, String> {
 
   Optional<User> findByRcUserIdAndDeleteDateIsNull(String rcUserId);
 
+  List<User> findAllByRcUserIdAndDeleteDateIsNull(String rcUserId);
+
   List<User> findAllByDeleteDateNotNull();
 
-  Optional<User> findByUsernameInAndDeleteDateIsNull(Collection<String> usernames);
+  List<User> findAllByUsernameInAndDeleteDateIsNull(Collection<String> usernames);
 
   /**
    * Find all users whose create date is older than given date and having no new registered session

@@ -91,6 +91,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.assertj.core.api.Fail;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.jeasy.random.EasyRandom;
@@ -925,15 +926,15 @@ class RocketChatServiceTest {
 
   @Test
   void
-      deleteGroupAsTechnicalUser_Should_throwRocketChatDeleteUserException_When_responseIsNotSuccess()
+      deleteGroupAsTechnicalUser_Should_notthrowRocketChatDeleteUserException_When_technicalUserCannotBeAddedToTheGroup()
           throws Exception {
-    assertThrows(
-        RocketChatDeleteGroupException.class,
-        () -> {
-          when(rcCredentialsHelper.getTechnicalUser()).thenThrow(new RuntimeException());
+    when(rcCredentialsHelper.getTechnicalUser()).thenThrow(new RuntimeException());
 
-          this.rocketChatService.deleteGroupAsTechnicalUser("");
-        });
+    try {
+      this.rocketChatService.deleteGroupAsTechnicalUser("");
+    } catch (RocketChatDeleteGroupException ex) {
+      Fail.fail("Should not throw RocketChatDeleteGroupException");
+    }
   }
 
   @Test
