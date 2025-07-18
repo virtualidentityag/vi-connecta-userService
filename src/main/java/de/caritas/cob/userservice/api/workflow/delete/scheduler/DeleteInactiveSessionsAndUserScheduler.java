@@ -26,9 +26,7 @@ public class DeleteInactiveSessionsAndUserScheduler {
   public void performDeletionWorkflow() {
     tenantContextProvider.setTechnicalContextIfMultiTenancyIsEnabled();
     if (sessionInactiveDeleteWorkflowEnabled) {
-      log.info("Start deletion workflow of inactive sessions and users.");
       this.deleteInactiveSessionsAndUserService.deleteInactiveSessionsAndUsers();
-      log.info("End deletion workflow of inactive sessions and users.");
     }
   }
 }
