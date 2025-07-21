@@ -3,6 +3,7 @@ package de.caritas.cob.userservice.api.adapters.web.controller;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.ADMIN_DATA_PATH;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.AGENCY_ADMIN_PATH;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.CONSULTANT_PATH;
+import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.DEACTIVATE_CONSULTANT_2FA;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.TENANT_ADMIN_PATH;
 import static de.caritas.cob.userservice.api.adapters.web.controller.UserAdminControllerIT.TENANT_ADMIN_PATH_WITHOUT_SLASH;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -787,5 +788,50 @@ class UserAdminControllerE2EIT {
             .andReturn();
     String content = result.getResponse().getContentAsString();
     return JsonPath.read(content, "_embedded.id");
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_CREATE})
+  void deactivateConsultantTwoFactorAuth_Should_returnOk_When_requiredConsultantIsGiven()
+      throws Exception {
+    // given
+    String consultantId = givenNewConsultantIsCreated();
+
+    // when
+    this.mockMvc
+        .perform(delete(DEACTIVATE_CONSULTANT_2FA + consultantId))
+        .andExpect(status().isOk());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_CREATE})
+  void deactivateConsultantTwoFactorAuth_Should_returnNoContent_When_givenConsultantDoesNotExist()
+      throws Exception {
+
+    // when
+    this.mockMvc
+        .perform(delete(DEACTIVATE_CONSULTANT_2FA + "consultantId"))
+        .andExpect(status().isNoContent());
+  }
+
+  @Test
+  void deactivateConsultantTwoFactorAuth_Should_returnUnauthorized_When_NoAuthorityValueIsSet()
+      throws Exception {
+
+    // when
+    this.mockMvc
+        .perform(delete(DEACTIVATE_CONSULTANT_2FA + "consultantId"))
+        .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  @WithMockUser(authorities = {AuthorityValue.USER_DEFAULT})
+  void deactivateConsultantTwoFactorAuth_Should_returnForbidden_When_WrongAuthorityValueIsSet()
+      throws Exception {
+
+    // when
+    this.mockMvc
+        .perform(delete(DEACTIVATE_CONSULTANT_2FA + "consultantId"))
+        .andExpect(status().isForbidden());
   }
 }
