@@ -121,8 +121,7 @@ class UserAdminControllerIT {
 
   @MockBean private JwtAuthConverterProperties jwtAuthConverterProperties;
 
-  @MockBean
-  private IdentityManaging identityManaging;
+  @MockBean private IdentityManaging identityManaging;
 
   @Test
   void getSessions_Should_returnBadRequest_When_requiredPaginationParamsAreMissing()
