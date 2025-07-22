@@ -1558,7 +1558,7 @@ class UserControllerIT {
   }
 
   @Test
-  void registerUser_Should_DecodePassword() throws Exception {
+  void registerUser_Should_NotDecodePassword() throws Exception {
     when(userHelper.isUsernameValid(anyString())).thenReturn(true);
     when(mandatoryFieldsProvider.fetchMandatoryFieldsForConsultingType(anyString()))
         .thenReturn(
@@ -1577,7 +1577,7 @@ class UserControllerIT {
     ArgumentCaptor<UserDTO> argument = ArgumentCaptor.forClass(UserDTO.class);
     verify(createUserFacade, times(1))
         .createUserAccountWithInitializedConsultingType(argument.capture());
-    assertEquals(DECODED_PASSWORD, argument.getValue().getPassword());
+    assertEquals(ENCODED_PASSWORD, argument.getValue().getPassword());
   }
 
   /** updatePassword() */

@@ -1,6 +1,5 @@
 package de.caritas.cob.userservice.api.adapters.web.dto.serialization;
 
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.PASSWORD;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.PASSWORD_URL_ENCODED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -33,7 +32,7 @@ public class UrlDecodePasswordJsonSerializationUtilsTest {
   public void deserialize_Schould_EncodePassword() throws JsonParseException, IOException {
     String json = "{\"password:\":\"" + PASSWORD_URL_ENCODED + "\"}";
     String result = deserializePassword(json);
-    assertEquals(PASSWORD, result);
+    assertEquals(PASSWORD_URL_ENCODED, result);
   }
 
   private String deserializePassword(String json) throws JsonParseException, IOException {

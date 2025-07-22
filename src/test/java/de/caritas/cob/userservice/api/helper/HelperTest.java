@@ -54,4 +54,13 @@ public class HelperTest {
       removeHTMLFromText_Should_RemoveHtmlAndJavascriptFromText_And_ShouldNot_RemoveNewslines() {
     assertEquals(TEXT_WITH_NEWLINE, Helper.removeHTMLFromText(TEXT_WITH_NEWLINE_AND_HTML_AND_JS));
   }
+
+  @Test
+  public void shouldCorrectlyDecodePassword() {
+    assertEquals("password", helper.urlDecodeString("password"));
+    assertEquals("Test!@#$%^&*()1234", helper.urlDecodeString("Test!@#$%^&*()1234"));
+    assertEquals(
+        "_$87q,+Np4xc5+FC:Vcg7W#mx@JTE!R~2SmEuU9a>cbDNx4.Ap++rEys.%7GJ5r",
+        helper.urlDecodeString("_$87q,+Np4xc5+FC:Vcg7W#mx@JTE!R~2SmEuU9a>cbDNx4.Ap++rEys.%7GJ5r"));
+  }
 }
