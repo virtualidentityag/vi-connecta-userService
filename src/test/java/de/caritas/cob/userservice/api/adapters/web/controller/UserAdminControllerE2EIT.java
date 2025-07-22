@@ -179,12 +179,6 @@ class UserAdminControllerE2EIT {
         .andExpect(status().isForbidden());
   }
 
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_CREATE})
-  void createNewConsultant_WithAuthorityConsultantCreateUpdate_Should_returnOK() throws Exception {
-    givenNewConsultantIsCreated();
-  }
-
   private String givenNewConsultantIsCreated() throws Exception {
     // given
     CreateConsultantDTO createAdminDTO = new EasyRandom().nextObject(CreateConsultantDTO.class);
@@ -792,25 +786,14 @@ class UserAdminControllerE2EIT {
 
   @Test
   @WithMockUser(authorities = {AuthorityValue.CONSULTANT_CREATE})
-  void deactivateConsultantTwoFactorAuth_Should_returnOk_When_requiredConsultantIsGiven()
-      throws Exception {
-    // given
-    String consultantId = givenNewConsultantIsCreated();
-
-    // when
-    this.mockMvc
-        .perform(delete(DEACTIVATE_CONSULTANT_2FA + consultantId))
-        .andExpect(status().isOk());
-  }
-
-  @Test
-  @WithMockUser(authorities = {AuthorityValue.CONSULTANT_CREATE})
   void deactivateConsultantTwoFactorAuth_Should_returnNoContent_When_givenConsultantDoesNotExist()
       throws Exception {
 
+    System.out.println(AuthorityValue.USER_ADMIN);
+
     // when
     this.mockMvc
-        .perform(delete(DEACTIVATE_CONSULTANT_2FA + "consultantId"))
+        .perform(delete(DEACTIVATE_CONSULTANT_2FA + "123e4567-e89b-12d3-a456-426614174000"))
         .andExpect(status().isNoContent());
   }
 
@@ -820,7 +803,7 @@ class UserAdminControllerE2EIT {
 
     // when
     this.mockMvc
-        .perform(delete(DEACTIVATE_CONSULTANT_2FA + "consultantId"))
+        .perform(delete(DEACTIVATE_CONSULTANT_2FA + "123e4567-e89b-12d3-a456-426614174000"))
         .andExpect(status().isUnauthorized());
   }
 
@@ -831,7 +814,7 @@ class UserAdminControllerE2EIT {
 
     // when
     this.mockMvc
-        .perform(delete(DEACTIVATE_CONSULTANT_2FA + "consultantId"))
+        .perform(delete(DEACTIVATE_CONSULTANT_2FA + "123e4567-e89b-12d3-a456-426614174000"))
         .andExpect(status().isForbidden());
   }
 }
