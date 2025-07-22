@@ -78,6 +78,7 @@ class UserAdminControllerIT {
   protected static final String DELETE_AGENCY_ADMIN_PATH = AGENCY_ADMIN_PATH + "%s";
   protected static final String AGENCIES_OF_ADMIN_PATH = ROOT_PATH + "/agencyadmins/%s/agencies";
   protected static final String DELETE_ADMIN_AGENCY_PATH = AGENCIES_OF_ADMIN_PATH + "/%s";
+  protected static final String DEACTIVATE_CONSULTANT_2FA = ROOT_PATH + "/2fa/";
 
   protected static final String AGENCY_CHANGE_TYPE_PATH = ROOT_PATH + "/agency/1/changetype";
   protected static final String PAGE_PARAM = "page";
