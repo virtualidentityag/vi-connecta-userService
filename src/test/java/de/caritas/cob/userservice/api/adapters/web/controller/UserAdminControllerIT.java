@@ -33,6 +33,7 @@ import de.caritas.cob.userservice.api.config.auth.RoleAuthorizationAuthorityMapp
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NoContentException;
 import de.caritas.cob.userservice.api.helper.AuthenticatedUser;
+import de.caritas.cob.userservice.api.port.in.IdentityManaging;
 import de.caritas.cob.userservice.api.service.appointment.AppointmentService;
 import de.caritas.cob.userservice.api.service.security.AuthorisationService;
 import de.caritas.cob.userservice.api.service.security.JwtAuthConverterProperties;
@@ -119,6 +120,9 @@ class UserAdminControllerIT {
   @MockBean private AuthorisationService authorisationService;
 
   @MockBean private JwtAuthConverterProperties jwtAuthConverterProperties;
+
+  @MockBean
+  private IdentityManaging identityManaging;
 
   @Test
   void getSessions_Should_returnBadRequest_When_requiredPaginationParamsAreMissing()
