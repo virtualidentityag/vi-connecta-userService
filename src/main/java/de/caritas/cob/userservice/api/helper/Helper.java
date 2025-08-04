@@ -60,11 +60,9 @@ public class Helper {
       if (stringToDecode == null) {
         return null;
       }
-      String tempPassword = stringToDecode.replace("%", PERCENT);
-      tempPassword = tempPassword.replace("+", PLUS);
+      String tempPassword = stringToDecode.replace("+", PLUS);
       String decodedPassword =
           java.net.URLDecoder.decode(tempPassword, StandardCharsets.UTF_8.name());
-      decodedPassword = decodedPassword.replace(PERCENT, "%"); // Restore the original percent signs
       return decodedPassword.replace(PLUS, "+"); // Restore the original percent signs
     } catch (UnsupportedEncodingException ex) {
       return null;
