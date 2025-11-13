@@ -4,6 +4,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
+import de.caritas.cob.userservice.api.tenant.TenantContextProvider;
 import de.caritas.cob.userservice.api.workflow.enquirynotification.service.EnquiryNotificationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +22,8 @@ class EnquiryNotificationSchedulerTest {
 
   @Mock private EnquiryNotificationService enquiryNotificationService;
 
+  @Mock private TenantContextProvider tenantContextProvider;
+
   @Test
   void
       sendEmailNotificationsForOpenEnquiries_Should_callEnquiryNotificationService_When_featureIsEnabled() {
@@ -28,6 +31,7 @@ class EnquiryNotificationSchedulerTest {
 
     enquiryNotificationScheduler.sendEmailNotificationsForOpenEnquiries();
 
+    verify(tenantContextProvider).setTechnicalContextIfMultiTenancyIsEnabled();
     verify(enquiryNotificationService).sendEmailNotificationsForOpenEnquiries();
   }
 
