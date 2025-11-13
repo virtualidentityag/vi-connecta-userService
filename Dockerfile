@@ -1,4 +1,4 @@
-FROM openjdk:17-oracle
+FROM openjdk:17
 VOLUME ["/tmp","/log"]
 EXPOSE 8080
 ARG JAR_FILE
