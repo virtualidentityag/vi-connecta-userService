@@ -3,7 +3,6 @@ package de.caritas.cob.userservice.api.workflow.enquirynotification.service;
 import static de.caritas.cob.userservice.api.helper.CustomLocalDateTime.nowInUtc;
 import static de.caritas.cob.userservice.api.helper.EmailNotificationUtils.deserializeNotificationSettingsOrDefaultIfNull;
 import static de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier.TEMPLATE_DAILY_ENQUIRY_NOTIFICATION;
-import static java.util.Arrays.asList;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
@@ -18,15 +17,13 @@ import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.agency.AgencyService;
 import de.caritas.cob.userservice.api.service.consultingtype.ReleaseToggle;
 import de.caritas.cob.userservice.api.service.consultingtype.ReleaseToggleService;
+import de.caritas.cob.userservice.api.service.emailsupplier.TenantTemplateSupplier;
 import de.caritas.cob.userservice.api.service.helper.MailService;
 import de.caritas.cob.userservice.api.workflow.enquirynotification.model.EnquiriesNotificationMailContent;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -49,6 +46,10 @@ public class EnquiryNotificationService {
   private final @NonNull AgencyService agencyService;
 
   private final @NonNull ReleaseToggleService releaseToggleService;
+  private final TenantTemplateSupplier tenantTemplateSupplier;
+
+  @Value("${multitenancy.enabled}")
+  private boolean multiTenancyEnabled;
 
   @Value("${enquiry.open.notification.check.hours}")
   private Long openEnquiryCheckHours;
@@ -96,17 +97,21 @@ public class EnquiryNotificationService {
 
   private Function<Entry<Long, Long>, EnquiriesNotificationMailContent> toMailContent(
       Map<Long, AgencyDTO> agencyIdToAgency) {
-    return agencyIdEnquiriesEntry -> {
-      var agencyId = agencyIdEnquiriesEntry.getKey();
-      var openEnquiries = agencyIdEnquiriesEntry.getValue();
-      AgencyDTO agency = agencyIdToAgency.get(agencyId);
-      var agencyName = agency == null ? UNKNOWN_AGENCY : agency.getName();
+    return entry -> {
+      var agencyId = entry.getKey();
+      var openEnquiries = entry.getValue();
+      var agency = agencyIdToAgency.get(agencyId);
+
       return EnquiriesNotificationMailContent.builder()
           .agencyId(agencyId)
           .amountOfOpenEnquiries(openEnquiries)
-          .agencyName(agencyName)
+          .agencyName(resolveAgencyName(agency))
           .build();
     };
+  }
+
+  private String resolveAgencyName(AgencyDTO agency) {
+    return Optional.ofNullable(agency).map(AgencyDTO::getName).orElse(UNKNOWN_AGENCY);
   }
 
   private void buildAndSendEnquiryNotificationMails(
@@ -133,21 +138,28 @@ public class EnquiryNotificationService {
 
   private MailDTO buildMailTO(
       Consultant consultant, EnquiriesNotificationMailContent enquiryNotificationContent) {
+    var templateAttributes = new ArrayList<TemplateDataDTO>();
+    templateAttributes.add(new TemplateDataDTO().key("subject").value(MAIL_SUBJECT));
+    templateAttributes.add(
+        new TemplateDataDTO().key("consultant_name").value(consultant.getFullName()));
+    templateAttributes.add(
+        new TemplateDataDTO().key("agency_name").value(enquiryNotificationContent.getAgencyName()));
+    templateAttributes.add(
+        new TemplateDataDTO()
+            .key("enquiries")
+            .value(String.valueOf(enquiryNotificationContent.getAmountOfOpenEnquiries())));
+
+    if (!multiTenancyEnabled) {
+      templateAttributes.add(new TemplateDataDTO().key("url").value(applicationBaseUrl));
+    } else {
+      templateAttributes.addAll(tenantTemplateSupplier.getTemplateAttributes());
+    }
+
     return new MailDTO()
         .template(TEMPLATE_DAILY_ENQUIRY_NOTIFICATION)
         .email(consultant.getEmail())
         .language(languageOf(consultant.getLanguageCode()))
-        .templateData(
-            asList(
-                new TemplateDataDTO().key("subject").value(MAIL_SUBJECT),
-                new TemplateDataDTO().key("consultant_name").value(consultant.getFullName()),
-                new TemplateDataDTO().key("url").value(applicationBaseUrl),
-                new TemplateDataDTO()
-                    .key("agency_name")
-                    .value(enquiryNotificationContent.getAgencyName()),
-                new TemplateDataDTO()
-                    .key("enquiries")
-                    .value(String.valueOf(enquiryNotificationContent.getAmountOfOpenEnquiries()))));
+        .templateData(templateAttributes);
   }
 
   private void buildAndSendNotificationEmail(List<MailDTO> mailsToSend) {
