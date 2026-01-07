@@ -6,7 +6,6 @@ import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_AGENCY_2;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID;
 import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_ENCODED;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
@@ -21,6 +20,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.reflect.Whitebox.setInternalState;
 
+import de.caritas.cob.userservice.api.adapters.web.mapping.UserDtoMapper;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.manager.consultingtype.ConsultingTypeManager;
@@ -28,6 +28,7 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
@@ -41,10 +42,7 @@ import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.Team
 import de.caritas.cob.userservice.mailservice.generated.web.model.LanguageCode;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.TemplateDataDTO;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -79,6 +77,10 @@ public class NewMessageEmailSupplierTest {
 
   @Mock private MessageClient messageClient;
 
+  @Mock private AccountManaging accountManager;
+
+  @Mock private UserDtoMapper userDtoMapper;
+
   @Mock private ReleaseToggleService releaseToggleService;
 
   @BeforeEach
@@ -96,6 +98,8 @@ public class NewMessageEmailSupplierTest {
             .emailDummySuffix("dummySuffix")
             .messageClient(messageClient)
             .releaseToggleService(releaseToggleService)
+            .accountManager(accountManager)
+            .userDtoMapper(userDtoMapper)
             .build();
     setInternalState(NewMessageEmailSupplier.class, "log", logger);
   }
@@ -295,12 +299,8 @@ public class NewMessageEmailSupplierTest {
   public void
       generateEmails_Should_ReturnExpectedEmailToAsker_When_ConsultantWritesToValidReceiver() {
     when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
-    Consultant consultant = mock(Consultant.class);
-    when(consultant.getUsername()).thenReturn(USERNAME_ENCODED);
-    when(session.getConsultant()).thenReturn(consultant);
-    when(consultant.getId()).thenReturn(USER.getUserId());
-    when(session.getUser()).thenReturn(USER);
-
+    String consultantDisplayName = "consultantDisplayName";
+    setupConsultant(consultantDisplayName);
     List<MailDTO> generatedMails = this.newMessageEmailSupplier.generateEmails();
 
     assertThat(generatedMails, hasSize(1));
@@ -311,7 +311,7 @@ public class NewMessageEmailSupplierTest {
     List<TemplateDataDTO> templateData = generatedMail.getTemplateData();
     assertThat(templateData, hasSize(3));
     assertThat(templateData.get(0).getKey(), is("consultantName"));
-    assertThat(templateData.get(0).getValue(), is("Username!#123"));
+    assertThat(templateData.get(0).getValue(), is(consultantDisplayName));
     assertThat(templateData.get(1).getKey(), is("askerName"));
     assertThat(templateData.get(1).getValue(), is("username"));
     assertThat(templateData.get(2).getKey(), is("url"));
@@ -321,11 +321,8 @@ public class NewMessageEmailSupplierTest {
   @Test
   public void generateEmails_Should_ReturnExpectedEmailToAdviceSeeker_When_AdviceSeekerIsOffline() {
     when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
-    Consultant consultant = mock(Consultant.class);
-    when(consultant.getUsername()).thenReturn(USERNAME_ENCODED);
-    when(session.getConsultant()).thenReturn(consultant);
-    when(consultant.getId()).thenReturn(USER.getUserId());
-    when(session.getUser()).thenReturn(USER);
+    String consultantDisplayName = "consultantDisplayName";
+    setupConsultant(consultantDisplayName);
     when(messageClient.isLoggedIn(any())).thenReturn(Optional.of(false));
 
     List<MailDTO> generatedMails = this.newMessageEmailSupplier.generateEmails();
@@ -350,11 +347,8 @@ public class NewMessageEmailSupplierTest {
     // given
     givenCurrentTenantDataIsSet();
     when(roles.contains(UserRole.CONSULTANT.getValue())).thenReturn(true);
-    Consultant consultant = mock(Consultant.class);
-    when(consultant.getUsername()).thenReturn(USERNAME_ENCODED);
-    when(session.getConsultant()).thenReturn(consultant);
-    when(consultant.getId()).thenReturn(USER.getUserId());
-    when(session.getUser()).thenReturn(USER);
+    String consultantDisplayName = "consultantDisplayName";
+    setupConsultant(consultantDisplayName);
     var mockedTemplateAtt = new ArrayList<TemplateDataDTO>();
     mockedTemplateAtt.add(new TemplateDataDTO());
     when(tenantTemplateSupplier.getTemplateAttributes()).thenReturn(mockedTemplateAtt);
@@ -392,5 +386,21 @@ public class NewMessageEmailSupplierTest {
     tenantData.setTenantId(1L);
     tenantData.setSubdomain("subdomain");
     TenantContext.setCurrentTenantData(tenantData);
+  }
+
+  private void setupConsultant(String consultantDisplayName) {
+    Consultant consultant = mock(Consultant.class);
+    Map<String, Object> consultantMap = new HashMap<>();
+    consultantMap.put("displayName", consultantDisplayName);
+    setupConsultantMocks(consultantDisplayName, consultant, consultantMap);
+  }
+
+  private void setupConsultantMocks(
+      String consultantDisplayName, Consultant consultant, Map<String, Object> consultantMap) {
+    when(consultant.getId()).thenReturn(USER.getUserId());
+    when(session.getConsultant()).thenReturn(consultant);
+    when(session.getUser()).thenReturn(USER);
+    when(accountManager.findConsultant(consultant.getId())).thenReturn(Optional.of(consultantMap));
+    when(userDtoMapper.displayNameOf(consultantMap)).thenReturn(consultantDisplayName);
   }
 }
