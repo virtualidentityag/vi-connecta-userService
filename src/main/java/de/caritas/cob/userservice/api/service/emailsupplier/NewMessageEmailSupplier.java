@@ -238,7 +238,7 @@ public class NewMessageEmailSupplier implements EmailSupplier {
         buildMailDtoForNewMessageNotificationAsker(
             asker.getEmail(),
             asker.getLanguageCode(),
-            consultantDisplayName,
+            usernameTranscoder.decodeUsername(consultantDisplayName),
             usernameTranscoder.decodeUsername(asker.getUsername()),
             asker.getDialect());
 
