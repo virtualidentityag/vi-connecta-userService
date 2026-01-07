@@ -1,4 +1,4 @@
-FROM openjdk:17-oracle
+FROM eclipse-temurin:17-jdk
 VOLUME ["/tmp","/log"]
 EXPOSE 8080
 ARG JAR_FILE
