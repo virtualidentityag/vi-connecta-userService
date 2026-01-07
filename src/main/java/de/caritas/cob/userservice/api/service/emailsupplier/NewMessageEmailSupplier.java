@@ -248,12 +248,12 @@ public class NewMessageEmailSupplier implements EmailSupplier {
   private String obtainConsultantDisplayName(Consultant consultant) {
     if (isSessionBelongsToConsultant(consultant)) {
       return accountManager
-              .findConsultant(consultant.getId())
-              .map(userDtoMapper::displayNameOf)
-              .orElseThrow(
-                  () ->
-                      new InternalServerErrorException(
-                          "Consultant with id %s not found.".formatted(consultant.getId())));
+          .findConsultant(consultant.getId())
+          .map(userDtoMapper::displayNameOf)
+          .orElseThrow(
+              () ->
+                  new InternalServerErrorException(
+                      "Consultant with id %s not found.".formatted(consultant.getId())));
     } else {
       return consultantService
           .getConsultant(userId)
