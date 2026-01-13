@@ -8,6 +8,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.web.dto.NotificationsSettingsDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ReassignmentNotificationDTO;
+import de.caritas.cob.userservice.api.adapters.web.mapping.UserDtoMapper;
 import de.caritas.cob.userservice.api.exception.httpresponses.BadRequestException;
 import de.caritas.cob.userservice.api.exception.httpresponses.ForbiddenException;
 import de.caritas.cob.userservice.api.exception.httpresponses.NotFoundException;
@@ -17,6 +18,7 @@ import de.caritas.cob.userservice.api.model.Consultant;
 import de.caritas.cob.userservice.api.model.NotificationsAware;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.port.out.IdentityClient;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
@@ -72,6 +74,8 @@ public class EmailNotificationFacade {
   private final @NonNull NewDirectEnquiryEmailSupplier newDirectEnquiryEmailSupplier;
   private final @NonNull AssignEnquiryEmailSupplier assignEnquiryEmailSupplier;
   private final @NonNull TenantTemplateSupplier tenantTemplateSupplier;
+  private final @NonNull AccountManaging accountManager;
+  private final @NonNull UserDtoMapper userDtoMapper;
 
   private final @NonNull ReleaseToggleService releaseToggleService;
 
@@ -169,6 +173,8 @@ public class EmailNotificationFacade {
               .multiTenancyEnabled(multiTenancyEnabled)
               .messageClient(messageClient)
               .releaseToggleService(releaseToggleService)
+              .accountManager(accountManager)
+              .userDtoMapper(userDtoMapper)
               .build();
       sendMailTasksToMailService(newMessageMails);
 
