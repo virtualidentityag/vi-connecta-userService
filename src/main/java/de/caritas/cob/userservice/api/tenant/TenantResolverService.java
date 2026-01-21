@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class TenantResolverService {
 
-  public static final Long TECHNICAL_TENANT_ID = 0L;
   @NonNull CustomHeaderTenantResolver customHeaderTenantResolver;
 
   @NonNull SubdomainTenantResolver subdomainTenantResolver;

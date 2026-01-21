@@ -6,22 +6,7 @@ import static de.caritas.cob.userservice.api.testHelper.AsyncVerification.verify
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_NAME_ROCKET_CHAT_SYSTEM_USER_ID;
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_VALUE_EMAIL_DUMMY_SUFFIX;
 import static de.caritas.cob.userservice.api.testHelper.FieldConstants.FIELD_VALUE_ROCKET_CHAT_SYSTEM_USER_ID;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.AGENCY_ID;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.APPLICATION_BASE_URL;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.APPLICATION_BASE_URL_FIELD_NAME;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID_2;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTANT_ID_3;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.CONSULTING_TYPE_ID_SUCHT;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_NO_TEAM_SESSION;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.IS_TEAM_SESSION;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.NAME;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_FEEDBACK_GROUP_ID;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.RC_GROUP_ID;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_CONSULTANT_ENCODED;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.USERNAME_ENCODED;
-import static de.caritas.cob.userservice.api.testHelper.TestConstants.USER_ID;
+import static de.caritas.cob.userservice.api.testHelper.TestConstants.*;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,6 +27,7 @@ import de.caritas.cob.userservice.api.adapters.rocketchat.RocketChatService;
 import de.caritas.cob.userservice.api.adapters.rocketchat.dto.group.GroupMemberDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.NotificationsSettingsDTO;
 import de.caritas.cob.userservice.api.adapters.web.dto.ReassignmentNotificationDTO;
+import de.caritas.cob.userservice.api.adapters.web.mapping.UserDtoMapper;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.EmailNotificationException;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
@@ -54,6 +40,7 @@ import de.caritas.cob.userservice.api.model.ConsultantStatus;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
 import de.caritas.cob.userservice.api.model.User;
+import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.port.out.ConsultantAgencyRepository;
 import de.caritas.cob.userservice.api.port.out.IdentityClientConfig;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
@@ -78,12 +65,7 @@ import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.Team
 import de.caritas.cob.userservice.consultingtypeservice.generated.web.model.WelcomeMessageDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailDTO;
 import de.caritas.cob.userservice.mailservice.generated.web.model.MailsDTO;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -469,6 +451,8 @@ class EmailNotificationFacadeTest {
   @Mock ConsultingTypeManager consultingTypeManager;
   @Mock IdentityClientConfig identityClientConfig;
   @Mock ReleaseToggleService releaseToggleService;
+  @Mock private AccountManaging accountManager;
+  @Mock private UserDtoMapper userDtoMapper;
 
   @Mock
   @SuppressWarnings("unused")
@@ -692,6 +676,7 @@ class EmailNotificationFacadeTest {
 
     when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, CONSULTANT_ID, CONSULTANT_ROLES))
         .thenReturn(SESSION_IN_PROGRESS);
+    setupConsultant();
     doThrow(new NullPointerException()).when(mailService).sendEmailNotification(any());
 
     emailNotificationFacade.sendNewMessageNotification(
@@ -720,6 +705,7 @@ class EmailNotificationFacadeTest {
 
     when(sessionService.getSessionByGroupIdAndUser(RC_GROUP_ID, CONSULTANT_ID, CONSULTANT_ROLES))
         .thenReturn(SESSION_IN_PROGRESS);
+    setupConsultant();
 
     emailNotificationFacade.sendNewMessageNotification(
         RC_GROUP_ID, CONSULTANT_ROLES, CONSULTANT_ID, null);
@@ -987,5 +973,19 @@ class EmailNotificationFacadeTest {
           emailNotificationFacade.sendReassignConfirmationNotification(
               reassignmentNotification, null);
         });
+  }
+
+  private void setupConsultant() {
+    Consultant consultant = SESSION_IN_PROGRESS.getConsultant();
+    String consultantDisplayName = "consultantDisplayName";
+    Map<String, Object> consultantMap = new HashMap<>();
+    consultantMap.put("displayName", consultantDisplayName);
+    setupConsultantMocks(consultantDisplayName, consultant, consultantMap);
+  }
+
+  private void setupConsultantMocks(
+      String consultantDisplayName, Consultant consultant, Map<String, Object> consultantMap) {
+    when(accountManager.findConsultant(consultant.getId())).thenReturn(Optional.of(consultantMap));
+    when(userDtoMapper.displayNameOf(consultantMap)).thenReturn(consultantDisplayName);
   }
 }

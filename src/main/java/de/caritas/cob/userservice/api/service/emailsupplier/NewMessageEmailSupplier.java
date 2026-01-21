@@ -12,6 +12,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import com.google.common.collect.Lists;
 import com.neovisionaries.i18n.LanguageCode;
+import de.caritas.cob.userservice.api.adapters.web.mapping.UserDtoMapper;
 import de.caritas.cob.userservice.api.config.auth.UserRole;
 import de.caritas.cob.userservice.api.exception.httpresponses.InternalServerErrorException;
 import de.caritas.cob.userservice.api.helper.UsernameTranscoder;
@@ -22,6 +23,7 @@ import de.caritas.cob.userservice.api.model.NotificationSettings;
 import de.caritas.cob.userservice.api.model.NotificationsAware;
 import de.caritas.cob.userservice.api.model.Session;
 import de.caritas.cob.userservice.api.model.Session.SessionStatus;
+import de.caritas.cob.userservice.api.port.in.AccountManaging;
 import de.caritas.cob.userservice.api.port.out.MessageClient;
 import de.caritas.cob.userservice.api.service.ConsultantAgencyService;
 import de.caritas.cob.userservice.api.service.ConsultantService;
@@ -38,6 +40,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 /** Supplier to provide mails to be sent when a new message has been written. */
@@ -58,6 +61,8 @@ public class NewMessageEmailSupplier implements EmailSupplier {
   private boolean multiTenancyEnabled;
   private final TenantTemplateSupplier tenantTemplateSupplier;
   private final MessageClient messageClient;
+  private final @NonNull AccountManaging accountManager;
+  private final @NonNull UserDtoMapper userDtoMapper;
 
   private final ReleaseToggleService releaseToggleService;
 
@@ -228,21 +233,27 @@ public class NewMessageEmailSupplier implements EmailSupplier {
     }
 
     var usernameTranscoder = new UsernameTranscoder();
-    var consultantUsername = obtainConsultantUsername();
+    var consultantDisplayName = obtainConsultantDisplayName(session.getConsultant());
     var mailDTO =
         buildMailDtoForNewMessageNotificationAsker(
             asker.getEmail(),
             asker.getLanguageCode(),
-            usernameTranscoder.decodeUsername(consultantUsername),
+            usernameTranscoder.decodeUsername(consultantDisplayName),
             usernameTranscoder.decodeUsername(asker.getUsername()),
             asker.getDialect());
 
     return singletonList(mailDTO);
   }
 
-  private String obtainConsultantUsername() {
-    if (isSessionBelongsToConsultant()) {
-      return session.getConsultant().getUsername();
+  private String obtainConsultantDisplayName(Consultant consultant) {
+    if (isSessionBelongsToConsultant(consultant)) {
+      return accountManager
+          .findConsultant(consultant.getId())
+          .map(userDtoMapper::displayNameOf)
+          .orElseThrow(
+              () ->
+                  new InternalServerErrorException(
+                      "Consultant with id %s not found.".formatted(consultant.getId())));
     } else {
       return consultantService
           .getConsultant(userId)
@@ -254,8 +265,8 @@ public class NewMessageEmailSupplier implements EmailSupplier {
     }
   }
 
-  private boolean isSessionBelongsToConsultant() {
-    return nonNull(session.getConsultant()) && session.getConsultant().getId().equals(userId);
+  private boolean isSessionBelongsToConsultant(Consultant consultant) {
+    return nonNull(consultant) && consultant.getId().equals(userId);
   }
 
   private boolean isAdviceSeekerWithEmail() {

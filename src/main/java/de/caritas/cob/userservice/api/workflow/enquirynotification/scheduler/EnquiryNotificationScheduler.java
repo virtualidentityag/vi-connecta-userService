@@ -2,6 +2,7 @@ package de.caritas.cob.userservice.api.workflow.enquirynotification.scheduler;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
+import de.caritas.cob.userservice.api.tenant.TenantContextProvider;
 import de.caritas.cob.userservice.api.workflow.enquirynotification.service.EnquiryNotificationService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +20,13 @@ public class EnquiryNotificationScheduler {
   @Value("${enquiry.open.notification.enabled}")
   private Boolean enquiryNotificationsEnabled;
 
+  private final @NonNull TenantContextProvider tenantContextProvider;
+
   /** Entry method to build and send email notifications. */
   @Scheduled(cron = "${enquiry.open.notification.cron}")
   public void sendEmailNotificationsForOpenEnquiries() {
     if (isTrue(enquiryNotificationsEnabled)) {
+      tenantContextProvider.setTechnicalContextIfMultiTenancyIsEnabled();
       enquiryNotificationService.sendEmailNotificationsForOpenEnquiries();
     }
   }

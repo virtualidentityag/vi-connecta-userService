@@ -5,10 +5,7 @@ import static de.caritas.cob.userservice.api.service.emailsupplier.EmailSupplier
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.util.ReflectionTestUtils.setField;
 
 import com.neovisionaries.i18n.LanguageCode;
@@ -218,10 +215,8 @@ class EnquiryNotificationServiceTest {
                     .key("subject")
                     .value("Online-Beratung | Unbeantwortete Erstanfragen"),
                 new TemplateDataDTO().key("consultant_name").value(consultantName),
-                new TemplateDataDTO().key("url").value("base/url"),
                 new TemplateDataDTO().key("agency_name").value(agencyName),
-                new TemplateDataDTO()
-                    .key("enquiries")
-                    .value(String.valueOf(amountOfOpenEnquiries))));
+                new TemplateDataDTO().key("enquiries").value(String.valueOf(amountOfOpenEnquiries)),
+                new TemplateDataDTO().key("url").value("base/url")));
   }
 }
