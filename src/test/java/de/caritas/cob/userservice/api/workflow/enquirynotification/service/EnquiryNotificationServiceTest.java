@@ -83,9 +83,9 @@ class EnquiryNotificationServiceTest {
                     "consultant4", "firstname4 lastname4")));
     var agencies =
         asList(
-            createAgency(1L, "Blue Agency"),
-            createAgency(2L, "Red Agency"),
-            createAgency(3L, "Yellow Agency"));
+            createAgency(1L, "Blue Agency", 1L),
+            createAgency(2L, "Red Agency", 1L),
+            createAgency(3L, "Yellow Agency", 1L));
     when(agencyService.getAgencies(asList(1L, 2L, 3L))).thenReturn(agencies);
 
     enquiryNotificationService.sendEmailNotificationsForOpenEnquiries();
@@ -131,6 +131,8 @@ class EnquiryNotificationServiceTest {
     openEnquiries.addAll(openEnquiriesForAgency(1L, nowInUtc().minusHours(13L), 2));
     openEnquiries.addAll(openEnquiriesForAgency(2L, nowInUtc().minusHours(13L), 1));
     openEnquiries.addAll(openEnquiriesForAgency(3L, nowInUtc().minusHours(11L), 5));
+    var agencies = asList(createAgency(1L, "Blue Agency", 1L), createAgency(2L, "Red Agency", 1L));
+    when(agencyService.getAgencies(asList(1L, 2L))).thenReturn(agencies);
     when(sessionRepository.findByStatus(SessionStatus.NEW)).thenReturn(openEnquiries);
 
     enquiryNotificationService.sendEmailNotificationsForOpenEnquiries();
@@ -142,6 +144,8 @@ class EnquiryNotificationServiceTest {
   void
       sendEmailNotificationsForOpenEnquiries_Should_sendNoMails_When_agenciesWithOpenEnquiriesAreNotToBeNotified() {
     var openEnquiries = openEnquiriesForAgency(2L, nowInUtc().minusHours(13L), 1);
+    var agencies = List.of(createAgency(2L, "Red Agency", 1L));
+    when(agencyService.getAgencies(List.of(2L))).thenReturn(agencies);
     when(consultantAgencyService.findConsultantsByAgencyId(2L))
         .thenReturn(
             List.of(
@@ -196,10 +200,11 @@ class EnquiryNotificationServiceTest {
     return consultantAgency;
   }
 
-  private AgencyDTO createAgency(long id, String name) {
+  private AgencyDTO createAgency(long id, String name, Long tenant) {
     AgencyDTO agency = new AgencyDTO();
     agency.setId(id);
     agency.setName(name);
+    agency.tenantId(tenant);
     return agency;
   }
 
