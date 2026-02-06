@@ -36,9 +36,19 @@ public class TenantTemplateSupplier {
   private boolean multitenancyWithSingleDomain;
 
   public List<TemplateDataDTO> getTemplateAttributes() {
+    return buildTemplateAttributes(getRestrictedTenantDTO());
+  }
 
+  public List<TemplateDataDTO> getTemplateAttributes(Long tenantId) {
+    RestrictedTenantDTO tenantData =
+        multitenancyWithSingleDomain
+            ? getRestrictedTenantDTO()
+            : tenantService.getRestrictedTenantData(tenantId);
+    return buildTemplateAttributes(tenantData);
+  }
+
+  private List<TemplateDataDTO> buildTemplateAttributes(RestrictedTenantDTO tenantData) {
     List<TemplateDataDTO> templateAttributes = new ArrayList<>();
-    RestrictedTenantDTO tenantData = getRestrictedTenantDTO();
     if (multitenancyWithSingleDomain) {
       RestrictedTenantDTO rootDomainTenantData =
           getRestrictedTenantDTOForSingleDomainMultitenancy();
