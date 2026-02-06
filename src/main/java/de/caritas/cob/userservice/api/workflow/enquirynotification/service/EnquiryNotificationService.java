@@ -101,11 +101,13 @@ public class EnquiryNotificationService {
       var agencyId = entry.getKey();
       var openEnquiries = entry.getValue();
       var agency = agencyIdToAgency.get(agencyId);
+      var tenantId = agency.getTenantId();
 
       return EnquiriesNotificationMailContent.builder()
           .agencyId(agencyId)
           .amountOfOpenEnquiries(openEnquiries)
           .agencyName(resolveAgencyName(agency))
+          .tenantId(tenantId)
           .build();
     };
   }
@@ -152,7 +154,8 @@ public class EnquiryNotificationService {
     if (!multiTenancyEnabled) {
       templateAttributes.add(new TemplateDataDTO().key("url").value(applicationBaseUrl));
     } else {
-      templateAttributes.addAll(tenantTemplateSupplier.getTemplateAttributes());
+      templateAttributes.addAll(
+          tenantTemplateSupplier.getTemplateAttributes(enquiryNotificationContent.getTenantId()));
     }
 
     return new MailDTO()
